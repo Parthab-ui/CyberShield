@@ -41,17 +41,34 @@ public class Main {
             return;
         }
 
-        // Launch UI on Event Dispatch Thread (Swing standard practice)
-        SwingUtilities.invokeLater(() -> {
-            LoginDialog loginDialog = new LoginDialog(null);
-            loginDialog.setVisible(true);
+        // Start built-in Localhost Web Server (http://localhost:8080)
+        try {
+            com.cybershield.web.CyberShieldWebServer.startServer(8080);
+        } catch (Exception e) {
+            System.err.println("[CyberShield] Warning: Could not start localhost web server on port 8080: " + e.getMessage());
+        }
 
-            if (loginDialog.isLoginSuccessful()) {
-                MainDashboardFrame dashboard = new MainDashboardFrame();
-                dashboard.setVisible(true);
+        // Launch Desktop UI on Event Dispatch Thread (Swing standard practice)
+        try {
+            if (!java.awt.GraphicsEnvironment.isHeadless()) {
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        LoginDialog loginDialog = new LoginDialog(null);
+                        loginDialog.setVisible(true);
+
+                        if (loginDialog.isLoginSuccessful()) {
+                            MainDashboardFrame dashboard = new MainDashboardFrame();
+                            dashboard.setVisible(true);
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("[CyberShield] Desktop UI closed or headless: " + ex.getMessage());
+                    }
+                });
             } else {
-                System.exit(0);
+                System.out.println("[CyberShield] Running in headless mode. Localhost Web Dashboard active on http://localhost:8080");
             }
-        });
+        } catch (Exception e) {
+            System.out.println("[CyberShield] Localhost Web Dashboard active on http://localhost:8080");
+        }
     }
 }
