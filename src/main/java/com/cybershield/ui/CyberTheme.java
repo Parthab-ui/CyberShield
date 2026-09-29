@@ -17,9 +17,9 @@ public final class CyberTheme {
     public static final Color BG_CARD_HOVER = new Color(51, 65, 85);    // #334155
     public static final Color BORDER_COLOR = new Color(51, 65, 85);     // #334155
 
-    // Accent Colors
-    public static final Color ACCENT_CYAN = new Color(6, 182, 212);     // #06B6D4
-    public static final Color ACCENT_BLUE = new Color(56, 189, 248);    // #38BDF8
+    // Accent Colors (Customizable via JColorChooser)
+    public static Color ACCENT_CYAN = new Color(6, 182, 212);     // #06B6D4
+    public static Color ACCENT_BLUE = new Color(56, 189, 248);    // #38BDF8
     public static final Color STATUS_GREEN = new Color(16, 185, 129);   // #10B981
     public static final Color STATUS_AMBER = new Color(245, 158, 11);   // #F59E0B
     public static final Color STATUS_RED = new Color(239, 68, 68);      // #EF4444
@@ -40,12 +40,18 @@ public final class CyberTheme {
     public static final Font FONT_MONO_BOLD = new Font("Consolas", Font.BOLD, 12);
 
     // Borders
-    public static final Border CARD_BORDER = BorderFactory.createCompoundBorder(
+    public static Border CARD_BORDER = BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(BORDER_COLOR, 1),
             BorderFactory.createEmptyBorder(12, 12, 12, 12)
     );
 
     public static final Border INNER_PADDING = BorderFactory.createEmptyBorder(8, 8, 8, 8);
+
+    public static void setAccentColor(Color newAccent) {
+        if (newAccent != null) {
+            ACCENT_CYAN = newAccent;
+        }
+    }
 
     private CyberTheme() {}
 }

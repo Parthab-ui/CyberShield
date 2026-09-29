@@ -67,15 +67,20 @@ cybershield/
     │       │   ├── SecurityUtils.java
     │       │   ├── DateTimeUtils.java
     │       │   ├── ValidationUtils.java
-    │       │   └── SimulationDataGenerator.java
-    │       └── ui/             # Java Swing Graphical User Interface
+    │       │   ├── SimulationDataGenerator.java
+    │       │   └── ProjectMetadata.java
+    │       └── ui/             # Java Swing Graphical User Interface (35+ Components)
     │           ├── CyberTheme.java
     │           ├── LoginDialog.java
     │           ├── MainDashboardFrame.java
+    │           ├── dialogs/
+    │           │   └── ProjectTeamDialog.java
     │           ├── components/
     │           │   ├── MetricCard.java
     │           │   ├── StyledButton.java
-    │           │   └── CyberTable.java
+    │           │   ├── CyberTable.java
+    │           │   ├── MitreAssetTreePanel.java
+    │           │   └── BlockedIpsListPanel.java
     │           └── panels/
     │               ├── TelemetryPanel.java
     │               ├── ThreatMonitorPanel.java

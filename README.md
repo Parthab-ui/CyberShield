@@ -6,10 +6,12 @@
 [![UI](https://img.shields.io/badge/GUI-Java%20Swing%20Dark%20SOC-black.svg)](https://docs.oracle.com/javase/tutorial/uiswing/)
 [![Scope](https://img.shields.io/badge/Scope-Educational%20Simulation-yellow.svg)](#disclaimer)
 
+> **Project Title:** CYBERSHIELD — Cybersecurity Threat Monitoring & Incident Response System  
 > **Course:** Advanced Object-Oriented Programming (AOOP), Java  
-> **Team Size:** 3 Members  
-> **Target:** 10-Mark Internal Undergraduate Engineering Project  
-
+> **Department:** Department of Computer Science & Engineering  
+> **Team Size:** 3 Members (Lead: Parthab Sarkar)  
+> **Evaluation Phase:** First Review (October 1st, 2026) — Java Swing GUI Front-End & Code Viva  
+> **Configuration File:** Editable in GUI or via `data/project_team.properties`  
 ---
 
 ## ⚠️ Important Educational Simulation Disclaimer
@@ -267,13 +269,59 @@ mvn exec:java
 
 ---
 
-## 9. 3-Member Team Division (For Viva & Presentation)
+## 9. Finalized 3-Member Team Division & First Review Dossier (Oct 1st)
 
-| Team Member | Subsystem Responsibility | Key Classes & Deliverables | Viva Focus Areas |
+> 💡 **In-App Team Configuration:** Team details and project title can be viewed and edited live in the running application by clicking **"🎓 Review 1 Team Dossier"** on the top toolbar or menu bar. Edits are persisted automatically to `data/project_team.properties`.
+
+| Team Member | Details & Subsystem Responsibility | Key Classes & Deliverables | Viva Code Focus Areas |
 | :--- | :--- | :--- | :--- |
-| **Member 1**<br>*(Data & Architecture Lead)* | Database Layer & Core Framework | `DatabaseManager`, `UserRepository`, `SecurityEventRepository`, `ThreatRepository`, `IncidentRepository`, `ResponseActionRepository`, custom exception hierarchy. | JDBC connection lifecycle, PreparedStatement, SQL injection prevention, SQLite transactions, try-with-resources, custom checked exceptions. |
-| **Member 2**<br>*(Detection & Simulation Lead)* | Threat Hierarchy & Heuristic Engine | `Threat` abstract class, `BruteForceThreat`, `PhishingThreat`, `MalwareThreat`, `SuspiciousLoginThreat`, `ThreatDetector` interface, concrete detectors, `ThreatDetectionEngine`, `SimulationService`. | Abstraction vs Inheritance, Runtime Polymorphism, Strategy pattern, in-memory sliding window counters with Collections (`Map`, `List`). |
-| **Member 3**<br>*(UI & Incident Response Lead)* | Java Swing GUI & Incident Workflows | `MainDashboardFrame`, `LoginDialog`, `MetricCard`, `CyberTable`, all UI panels (`Telemetry`, `Threats`, `Incidents`, `Simulator`, `Analytics`, `Users`), `IncidentService`. | Swing Event Dispatch Thread (EDT), Composition (`Incident` HAS-A `Threat` & HAS-MANY `ResponseAction`), responsive event wiring, containment state machines. |
+| **Member 1 (Team Lead)**<br>**Parthab Sarkar** | **Roll No:** `23BCSE0101` *(Editable)*<br>**Subsystem:** Database Layer, Relational Schema & Core Framework | `DatabaseManager`, `UserRepository`, `SecurityEventRepository`, `ThreatRepository`, `IncidentRepository`, `ResponseActionRepository`, `ProjectMetadata`, custom checked exception hierarchy. | JDBC connection lifecycle, PreparedStatement, SQL injection prevention, SQLite transactions, try-with-resources, custom checked exceptions. |
+| **Member 2**<br>**Team Member 2** | **Roll No:** `23BCSE0102` *(Editable)*<br>**Subsystem:** Threat Hierarchy, Polymorphic Heuristic Engine & Attack Simulator | `Threat` abstract class, `BruteForceThreat`, `PhishingThreat`, `MalwareThreat`, `SuspiciousLoginThreat`, `ThreatDetector` interface, concrete detectors, `ThreatDetectionEngine`, `SimulationService`. | Abstraction vs Inheritance, Runtime Polymorphism, Strategy pattern, in-memory sliding window counters with Collections (`Map`, `List`). |
+| **Member 3**<br>**Team Member 3** | **Roll No:** `23BCSE0103` *(Editable)*<br>**Subsystem:** Java Swing Front-End Architecture, Component Suite & Incident Workflows | `MainDashboardFrame`, `ProjectTeamDialog`, `MitreAssetTreePanel`, `BlockedIpsListPanel`, `LoginDialog`, `MetricCard`, `CyberTable`, all UI panels (`Telemetry`, `Threats`, `Incidents`, `Simulator`, `Analytics`, `Users`), `IncidentService`. | Swing Event Dispatch Thread (EDT), 35+ Swing components integration, Composition (`Incident` HAS-A `Threat` & HAS-MANY `ResponseAction`), responsive event wiring, containment state machines. |
+
+---
+
+## 9.1 Complete Java Swing Front-End Component Audit (35 Items Implemented)
+
+*Criterion 1 for Review 1: Marks awarded based on how many components were added in the GUI (almost all Java Swing components).*
+
+| # | Swing Component | Class Name | Usage & Role in CYBERSHIELD | Source Location |
+| :---: | :--- | :--- | :--- | :--- |
+| **1** | `JFrame` | `javax.swing.JFrame` | Main application SOC desktop frame with custom dark title bar and layout | `MainDashboardFrame.java` |
+| **2** | `JDialog` | `javax.swing.JDialog` | Modal dialogs for Analyst Login and Team/Review 1 Dossier | `LoginDialog.java`, `ProjectTeamDialog.java` |
+| **3** | `JPanel` | `javax.swing.JPanel` | Modular container panels with custom dark theme backgrounds and borders | Across all views |
+| **4** | `JLabel` | `javax.swing.JLabel` | Metrics values, titles, status badges, and dynamic text counters | `MetricCard.java`, headers |
+| **5** | `JButton` | `javax.swing.JButton` | Action buttons with cyberpunk glow hover effects and status styling | `StyledButton.java` |
+| **6** | `JToggleButton` | `javax.swing.JToggleButton` | Real-time Telemetry Live Stream toggle ON/OFF | `MainDashboardFrame.java` (Toolbar) |
+| **7** | `JCheckBox` | `javax.swing.JCheckBox` | Auto-escalate, audio chime alert, and filter check controls | `AttackSimulatorPanel.java`, `TelemetryPanel.java` |
+| **8** | `JRadioButton` | `javax.swing.JRadioButton` | Threat severity filters and simulation profile selectors | `ThreatMonitorPanel.java`, `AttackSimulatorPanel.java` |
+| **9** | `ButtonGroup` | `javax.swing.ButtonGroup` | Enforces mutual exclusion for severity and simulation profile radio buttons | `ThreatMonitorPanel.java`, `AttackSimulatorPanel.java` |
+| **10** | `JComboBox` | `javax.swing.JComboBox` | Dropdowns for telemetry event types, user roles, and export options | `TelemetryPanel.java`, `UsersPanel.java` |
+| **11** | `JTextField` | `javax.swing.JTextField` | Search query input, manual IP address entry, and profile editing | `TelemetryPanel.java`, `LoginDialog.java`, `ProjectTeamDialog.java` |
+| **12** | `JPasswordField` | `javax.swing.JPasswordField` | Masked credential inputs with secure SHA-256 password hashing | `LoginDialog.java`, `UsersPanel.java` |
+| **13** | `JTextArea` | `javax.swing.JTextArea` | Monospace raw payload inspection and simulation execution traces | `TelemetryPanel.java`, `AttackSimulatorPanel.java` |
+| **14** | `JTextPane` | `javax.swing.JTextPane` | Rich HTML formatted polymorphic threat dossiers with colored status badges | `ThreatMonitorPanel.java` |
+| **15** | `JTable` | `javax.swing.JTable` | Custom styled tables with severity badge renderers and column sorters | `CyberTable.java` (All Panels) |
+| **16** | `JScrollPane` | `javax.swing.JScrollPane` | Dark-themed scrollable viewports for tables, text areas, and trees | `CyberTable.java`, Panels |
+| **17** | `JSplitPane` | `javax.swing.JSplitPane` | Master-detail resizable horizontal and vertical divider panes | `ThreatMonitorPanel.java`, `IncidentConsolePanel.java`, `TelemetryPanel.java` |
+| **18** | `JTabbedPane` | `javax.swing.JTabbedPane` | Multi-tab organized navigation across metrics, dossiers, and checklists | `AnalyticsPanel.java`, `ThreatMonitorPanel.java`, `ProjectTeamDialog.java` |
+| **19** | `JProgressBar` | `javax.swing.JProgressBar` | Threat breakdown category progress meters and real-time attack progress animation | `AnalyticsPanel.java`, `AttackSimulatorPanel.java` |
+| **20** | `JSlider` | `javax.swing.JSlider` | Detection Sensitivity threshold (0-100%) and simulation pacing sliders | `MainDashboardFrame.java`, `ThreatMonitorPanel.java`, `AttackSimulatorPanel.java` |
+| **21** | `JSpinner` | `javax.swing.JSpinner` | Numeric spinners for auto-refresh interval (1-60s) and log limit (10-500) | `MainDashboardFrame.java`, `TelemetryPanel.java` |
+| **22** | `JList` | `javax.swing.JList` | Active firewall perimeter blocked IP droplist with add/remove controls | `BlockedIpsListPanel.java` |
+| **23** | `JTree` | `javax.swing.JTree` | Enterprise IT Infrastructure Assets and MITRE ATT&CK Matrix tree hierarchy | `MitreAssetTreePanel.java` |
+| **24** | `JMenuBar` | `javax.swing.JMenuBar` | Top desktop application menu bar (File, View, Simulation, Tools, Review) | `MainDashboardFrame.java` |
+| **25** | `JMenu` | `javax.swing.JMenu` | Dropdown menus with styled font and accelerator shortcuts | `MainDashboardFrame.java` |
+| **26** | `JMenuItem` | `javax.swing.JMenuItem` | Menu actions for exporting, launching scenarios, and switching views | `MainDashboardFrame.java` |
+| **27** | `JCheckBoxMenuItem` | `javax.swing.JCheckBoxMenuItem` | Checkable menu items for Auto-Refresh timer toggle | `MainDashboardFrame.java` |
+| **28** | `JRadioButtonMenuItem` | `javax.swing.JRadioButtonMenuItem` | Radio menu items for selecting execution profiles (Standard / Aggressive) | `MainDashboardFrame.java` |
+| **29** | `JPopupMenu` | `javax.swing.JPopupMenu` | Right-click context menus on table rows (Escalate, Copy IP, Block, Inspect) | `ThreatMonitorPanel.java`, `TelemetryPanel.java` |
+| **30** | `JToolBar` | `javax.swing.JToolBar` | SOC Rapid Action operations toolbar beneath header | `MainDashboardFrame.java` |
+| **31** | `JFileChooser` | `javax.swing.JFileChooser` | Native OS file chooser dialog for exporting incident cases and telemetry to CSV | `MainDashboardFrame.java`, `TelemetryPanel.java` |
+| **32** | `JColorChooser` | `javax.swing.JColorChooser` | Live interactive SOC accent color customizer dialog | `MainDashboardFrame.java` |
+| **33** | `JSeparator` | `javax.swing.JSeparator` | Visual horizontal and vertical separators in toolbars, menus, and forms | `MainDashboardFrame.java`, dialogs |
+| **34** | `JToolTip` | `javax.swing.JToolTip` | Contextual hover tooltips on all interactive buttons and inputs | Across all UI controls |
+| **35** | `JOptionPane` | `javax.swing.JOptionPane` | Modal alert, confirmation, input, and warning message popups | Controllers & service handlers |
 
 ---
 

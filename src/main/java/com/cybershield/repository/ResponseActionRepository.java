@@ -78,6 +78,10 @@ public class ResponseActionRepository {
         }
     }
 
+    public List<ResponseAction> findAll() throws DatabaseOperationException {
+        return findAll(200);
+    }
+
     public List<ResponseAction> findAll(int limit) throws DatabaseOperationException {
         List<ResponseAction> list = new ArrayList<>();
         String sql = "SELECT * FROM response_actions ORDER BY id DESC LIMIT ?";
