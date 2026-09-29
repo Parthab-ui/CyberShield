@@ -1,6 +1,5 @@
 package com.cybershield.ui.panels;
 
-import com.cybershield.exception.IncidentManagementException;
 import com.cybershield.model.Incident;
 import com.cybershield.model.SecurityEvent;
 import com.cybershield.model.Threat;
@@ -13,7 +12,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.time.LocalDateTime;
@@ -21,7 +19,6 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;

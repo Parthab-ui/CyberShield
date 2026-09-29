@@ -5,7 +5,6 @@ import com.cybershield.model.User;
 import com.cybershield.service.AuthService;
 import com.cybershield.ui.components.StyledButton;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -137,7 +136,7 @@ public class LoginDialog extends JDialog {
         String password = new String(txtPassword.getPassword()).trim();
 
         try {
-            User user = authService.login(username, password);
+            authService.login(username, password);
             loginSuccessful = true;
             dispose();
         } catch (AuthenticationException ex) {

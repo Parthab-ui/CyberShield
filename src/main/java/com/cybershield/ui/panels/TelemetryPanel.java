@@ -2,7 +2,6 @@ package com.cybershield.ui.panels;
 
 import com.cybershield.exception.DatabaseOperationException;
 import com.cybershield.model.SecurityEvent;
-import com.cybershield.model.enums.EventType;
 import com.cybershield.repository.DatabaseManager;
 import com.cybershield.repository.SecurityEventRepository;
 import com.cybershield.ui.CyberTheme;
