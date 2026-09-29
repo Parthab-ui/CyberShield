@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Built-in HTTP Web Server for CyberShield.
- * Runs on http://localhost:8080 using standard Java 17 jdk.httpserver (zero external dependencies).
+ * Runs on http://localhost:8080 using standard Java 17 jdk.httpserver without external dependencies.
  * Serves a modern dark-mode SOC dashboard and REST API endpoints.
  */
 public class CyberShieldWebServer {

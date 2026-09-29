@@ -1,7 +1,6 @@
 package com.cybershield.ui;
 
 import com.cybershield.exception.AuthenticationException;
-import com.cybershield.model.User;
 import com.cybershield.service.AuthService;
 import com.cybershield.ui.components.StyledButton;
 import java.awt.BorderLayout;

@@ -30,7 +30,7 @@ import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * Panel managing active incident cases and executing simulated containment response actions.
+ * Incident Response and Containment Console Panel.
  * Demonstrates Composition: Incident HAS-A Threat and HAS-MANY ResponseAction.
  */
 public class IncidentConsolePanel extends JPanel {

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 /**
- * Automated smoke test verifying all 9 core operational requirements of CyberShield.
+ * Automated smoke test suite verifying all 9 core operational requirements of CyberShield.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SmokeTest {

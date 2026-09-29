@@ -4,6 +4,7 @@ import com.cybershield.exception.DatabaseOperationException;
 import com.cybershield.repository.DatabaseManager;
 import com.cybershield.ui.LoginDialog;
 import com.cybershield.ui.MainDashboardFrame;
+import com.cybershield.web.CyberShieldWebServer;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -43,7 +44,7 @@ public class Main {
 
         // Start built-in Localhost Web Server (http://localhost:8080)
         try {
-            com.cybershield.web.CyberShieldWebServer.startServer(8080);
+            CyberShieldWebServer.startServer(8080);
         } catch (Exception e) {
             System.err.println("[CyberShield] Warning: Could not start localhost web server on port 8080: " + e.getMessage());
         }
