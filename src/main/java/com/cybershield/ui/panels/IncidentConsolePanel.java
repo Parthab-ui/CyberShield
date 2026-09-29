@@ -16,7 +16,6 @@ import com.cybershield.ui.components.CyberTable;
 import com.cybershield.ui.components.StyledButton;
 import com.cybershield.util.DateTimeUtils;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
