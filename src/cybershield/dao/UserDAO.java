@@ -112,4 +112,26 @@ public class UserDAO {
         }
         return null; // Login failed
     }
+
+    /**
+     * Returns true if a user with the given username already exists in the database.
+     * Used by RegisterDialog to prevent duplicate usernames.
+     */
+    public boolean usernameExists(String username) {
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking username: " + e.getMessage());
+        }
+        return false;
+    }
 }

@@ -1,5 +1,6 @@
 package cybershield;
 
+import cybershield.gui.LoginFrame;
 import cybershield.gui.MainFrame;
 import cybershield.model.User;
 
@@ -8,7 +9,7 @@ import javax.swing.SwingUtilities;
 /**
  * Main — The entry point of the CyberShield application.
  * Uses SwingUtilities.invokeLater() to start the GUI on the Event Dispatch Thread (EDT).
- * For now, opens MainFrame directly. The login screen will be added later.
+ * Starts with LoginFrame; after successful authentication, opens MainFrame and passes the User.
  */
 public class Main {
 
@@ -19,15 +20,16 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MainFrame frame = new MainFrame();
-
-                // Temporary: set a default user so the status bar shows something.
-                // The login module will replace this with a real login dialog later.
-                User defaultUser = new User("admin", "admin123", "ADMIN");
-                defaultUser.setId(1);
-                frame.setCurrentUser(defaultUser);
-
-                frame.setVisible(true);
+                LoginFrame loginFrame = new LoginFrame();
+                loginFrame.setLoginCallback(new LoginFrame.LoginCallback() {
+                    @Override
+                    public void onLoginSuccess(User user) {
+                        MainFrame mainFrame = new MainFrame();
+                        mainFrame.setCurrentUser(user);
+                        mainFrame.setVisible(true);
+                    }
+                });
+                loginFrame.setVisible(true);
             }
         });
     }

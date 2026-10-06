@@ -1,5 +1,7 @@
 package cybershield.gui;
 
+import cybershield.dao.LogDAO;
+import cybershield.model.LogEntry;
 import cybershield.model.User;
 import cybershield.util.Theme;
 
@@ -24,7 +26,7 @@ import javax.swing.JToolBar;
 /**
  * MainFrame — The main application window.
  * Demonstrates INHERITANCE: extends JFrame.
- * Contains a menu bar, toolbar, tabbed pane with placeholder panels, and a status bar.
+ * Contains a menu bar, toolbar, tabbed pane with Dashboard and module panels, and a status bar.
  */
 public class MainFrame extends JFrame {
 
@@ -32,7 +34,7 @@ public class MainFrame extends JFrame {
     private JTabbedPane tabbedPane;
     private JLabel statusLabel;
 
-    // Placeholder panels (one per tab)
+    // Tab panels
     private DashboardPanel dashboardPanel;
     private ThreatMonitorPanel threatMonitorPanel;
     private IncidentsPanel incidentsPanel;
@@ -73,6 +75,18 @@ public class MainFrame extends JFrame {
         // ---- File menu ----
         JMenu fileMenu = new JMenu("File");
         fileMenu.setForeground(Theme.TEXT_PRIMARY);
+
+        JMenuItem logoutItem = new JMenuItem("Logout");
+        // Event listener: triggered when user clicks File > Logout
+        logoutItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                performLogout();
+            }
+        });
+        fileMenu.add(logoutItem);
+
+        fileMenu.addSeparator();
 
         JMenuItem exitItem = new JMenuItem("Exit");
         // Event listener: triggered when user clicks File > Exit
@@ -161,16 +175,7 @@ public class MainFrame extends JFrame {
         logoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int confirm = JOptionPane.showConfirmDialog(
-                    MainFrame.this,
-                    "Are you sure you want to logout?",
-                    "Confirm Logout",
-                    JOptionPane.YES_NO_OPTION
-                );
-                if (confirm == JOptionPane.YES_OPTION) {
-                    // For now, just exit. Login module will handle this properly later.
-                    System.exit(0);
-                }
+                performLogout();
             }
         });
         toolBar.add(logoutButton);
@@ -179,17 +184,50 @@ public class MainFrame extends JFrame {
     }
 
     // ================================================================
+    // LOGOUT LOGIC
+    // ================================================================
+
+    /**
+     * Confirms logout, writes an audit log entry, closes MainFrame, and returns to LoginFrame.
+     */
+    private void performLogout() {
+        int confirm = JOptionPane.showConfirmDialog(
+            MainFrame.this,
+            "Are you sure you want to logout?",
+            "Confirm Logout",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (currentUser != null) {
+                LogDAO logDAO = new LogDAO();
+                logDAO.add(new LogEntry(currentUser.getId(), "User logged out: " + currentUser.getUsername()));
+            }
+            dispose();
+            LoginFrame loginFrame = new LoginFrame();
+            loginFrame.setLoginCallback(new LoginFrame.LoginCallback() {
+                @Override
+                public void onLoginSuccess(User user) {
+                    MainFrame newFrame = new MainFrame();
+                    newFrame.setCurrentUser(user);
+                    newFrame.setVisible(true);
+                }
+            });
+            loginFrame.setVisible(true);
+        }
+    }
+
+    // ================================================================
     // TABBED PANE
     // ================================================================
 
-    /** Creates the tabbed pane with all placeholder panels. */
+    /** Creates the tabbed pane with DashboardPanel and other module panels. */
     private JTabbedPane createTabbedPane() {
         tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(Theme.PANEL_BG);
         tabbedPane.setForeground(Theme.TEXT_PRIMARY);
         tabbedPane.setFont(Theme.FONT_BODY);
 
-        // Create placeholder panels
+        // Create panels (DashboardPanel is fully functional; others are placeholders)
         dashboardPanel      = new DashboardPanel();
         threatMonitorPanel  = new ThreatMonitorPanel();
         incidentsPanel      = new IncidentsPanel();
@@ -229,7 +267,7 @@ public class MainFrame extends JFrame {
     // ================================================================
 
     /**
-     * Sets the currently logged-in user and updates the status bar.
+     * Sets the currently logged-in user, updates the status bar, and refreshes the dashboard.
      * Other modules can call this after a successful login.
      */
     public void setCurrentUser(User user) {
@@ -237,6 +275,9 @@ public class MainFrame extends JFrame {
         if (user != null) {
             statusLabel.setText("Logged in as: " + user.getUsername()
                     + "  |  Role: " + user.getRole());
+            if (dashboardPanel != null) {
+                dashboardPanel.refreshData();
+            }
         } else {
             statusLabel.setText("Not logged in");
         }
