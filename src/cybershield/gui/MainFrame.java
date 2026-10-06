@@ -278,6 +278,10 @@ public class MainFrame extends JFrame {
             if (dashboardPanel != null) {
                 dashboardPanel.refreshData();
             }
+            if (threatMonitorPanel != null) {
+                threatMonitorPanel.setCurrentUser(user);
+                threatMonitorPanel.refreshData();
+            }
         } else {
             statusLabel.setText("Not logged in");
         }

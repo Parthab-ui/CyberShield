@@ -115,4 +115,43 @@ public class BlockedIPDAO implements GenericDAO<BlockedIP> {
             rs.getTimestamp("blocked_at")
         );
     }
+
+    /**
+     * Checks if an IP address is already present in the blocked_ips table.
+     * Used by ThreatMonitorPanel to prevent duplicate blocks.
+     */
+    public boolean existsByIP(String ipAddress) {
+        String sql = "SELECT COUNT(*) FROM blocked_ips WHERE ip_address = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, ipAddress);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking blocked IP: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Deletes a blocked IP entry by its IP address string.
+     */
+    public void deleteByIP(String ipAddress) {
+        String sql = "DELETE FROM blocked_ips WHERE ip_address = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, ipAddress);
+            ps.executeUpdate();
+            System.out.println("Blocked IP removed: " + ipAddress);
+
+        } catch (SQLException e) {
+            System.out.println("Error removing blocked IP: " + e.getMessage());
+        }
+    }
 }

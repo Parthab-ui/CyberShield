@@ -126,4 +126,114 @@ public class ThreatDAO implements GenericDAO<Threat> {
             rs.getTimestamp("detected_at")
         );
     }
+
+    /**
+     * Updates only the status column of a threat (DETECTED, INVESTIGATING, RESOLVED).
+     * Used by table context menu and details action buttons.
+     */
+    public void updateStatus(int id, String newStatus) {
+        String sql = "UPDATE threats SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, newStatus);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            System.out.println("Threat status updated: id=" + id + " -> " + newStatus);
+
+        } catch (SQLException e) {
+            System.out.println("Error updating threat status: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Returns all threats matching a specific status.
+     */
+    public List<Threat> getByStatus(String status) {
+        List<Threat> list = new ArrayList<>();
+        String sql = "SELECT * FROM threats WHERE status = ? ORDER BY detected_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(extractThreat(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching threats by status: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * Searches threats across threat type, source IP, or target system.
+     */
+    public List<Threat> search(String keyword) {
+        List<Threat> list = new ArrayList<>();
+        String sql = "SELECT * FROM threats WHERE threat_type LIKE ? OR source_ip LIKE ? "
+                   + "OR target_system LIKE ? ORDER BY detected_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            String term = "%" + keyword + "%";
+            ps.setString(1, term);
+            ps.setString(2, term);
+            ps.setString(3, term);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(extractThreat(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error searching threats: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * Returns a list of distinct target system names for building the Network Map tree.
+     */
+    public List<String> getDistinctTargetSystems() {
+        List<String> systems = new ArrayList<>();
+        String sql = "SELECT DISTINCT target_system FROM threats ORDER BY target_system ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                systems.add(rs.getString("target_system"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching distinct target systems: " + e.getMessage());
+        }
+        return systems;
+    }
+
+    /**
+     * Returns threats detected within the last N days.
+     */
+    public List<Threat> getRecentThreats(int days) {
+        List<Threat> list = new ArrayList<>();
+        String sql = "SELECT * FROM threats WHERE detected_at >= DATE_SUB(NOW(), INTERVAL ? DAY) "
+                   + "ORDER BY detected_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, days);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(extractThreat(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching recent threats: " + e.getMessage());
+        }
+        return list;
+    }
 }
