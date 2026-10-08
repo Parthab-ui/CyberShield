@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -219,12 +220,12 @@ public class ThreatDAO implements GenericDAO<Threat> {
      */
     public List<Threat> getRecentThreats(int days) {
         List<Threat> list = new ArrayList<>();
-        String sql = "SELECT * FROM threats WHERE detected_at >= DATE_SUB(NOW(), INTERVAL ? DAY) "
-                   + "ORDER BY detected_at DESC";
+        String sql = "SELECT * FROM threats WHERE detected_at >= ? ORDER BY detected_at DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, days);
+            long cutoffMillis = System.currentTimeMillis() - (days * 86400000L);
+            ps.setTimestamp(1, new Timestamp(cutoffMillis));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(extractThreat(rs));

@@ -145,11 +145,12 @@ public class LogDAO implements GenericDAO<LogEntry> {
      */
     public List<LogEntry> getRecentLogs(int days) {
         List<LogEntry> logs = new ArrayList<>();
-        String sql = "SELECT * FROM logs WHERE log_time >= DATE_SUB(NOW(), INTERVAL ? DAY) ORDER BY log_time DESC";
+        String sql = "SELECT * FROM logs WHERE log_time >= ? ORDER BY log_time DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, days);
+            long cutoffMillis = System.currentTimeMillis() - (days * 86400000L);
+            ps.setTimestamp(1, new Timestamp(cutoffMillis));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     logs.add(extractLogEntry(rs));

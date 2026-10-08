@@ -1,136 +1,84 @@
 # CyberShield — Cybersecurity Threat Monitoring & Incident Response
 
-A college project for the **Advanced Object-Oriented Programming (AOOP)** course.  
-Built with **Java 17**, **Swing**, and **MySQL** (plain JDBC, no frameworks).
+An Advanced Object-Oriented Programming (AOOP) course capstone project.  
+Built with **Java 17**, **Swing**, and **Plain JDBC** (Zero Frameworks).
 
 ---
 
-## Folder Structure
+## ⚡ Quick Start (Zero Manual Setup Required)
 
-```
-cybershield/
-├── lib/                          ← Place mysql-connector-j-X.X.X.jar here
-│   └── README.txt
-├── out/                          ← Compiled .class files go here (created by javac)
-├── src/
-│   └── cybershield/
-│       ├── Main.java             ← Entry point
-│       ├── gui/
-│       │   ├── BasePanel.java    ← Abstract panel (abstraction)
-│       │   ├── MainFrame.java    ← Main window (inheritance from JFrame)
-│       │   ├── DashboardPanel.java
-│       │   ├── ThreatMonitorPanel.java
-│       │   ├── IncidentsPanel.java
-│       │   ├── ReportsPanel.java
-│       │   └── SettingsPanel.java
-│       ├── model/
-│       │   ├── User.java
-│       │   ├── Threat.java
-│       │   ├── Incident.java
-│       │   ├── BlockedIP.java
-│       │   └── LogEntry.java
-│       ├── dao/
-│       │   ├── GenericDAO.java   ← Interface (abstraction)
-│       │   ├── UserDAO.java
-│       │   ├── ThreatDAO.java
-│       │   ├── IncidentDAO.java
-│       │   ├── BlockedIPDAO.java
-│       │   └── LogDAO.java
-│       └── util/
-│           ├── DBConnection.java ← Singleton DB connection
-│           ├── Theme.java        ← UI colors, fonts, styling
-│           └── Validator.java    ← Input validation helpers
-├── schema.sql                    ← MySQL database setup script
-├── README.md                     ← This file
-└── VIVA_NOTES.md                 ← Viva preparation guide
-```
+CyberShield features an **Automatic Database & Schema Engine**.  
+You **do NOT need** to open MySQL Workbench, manually execute `schema.sql`, or hard-code passwords into Java files.
 
----
-
-## Step-by-Step Run Instructions
-
-### Prerequisites
-
-- **Java JDK 17** (or later) installed → verify with `java -version`
-- **MySQL 8.x** installed and running → verify with `mysql --version`
-
-### Step 1 — Download the MySQL JDBC Driver
-
-1. Go to https://dev.mysql.com/downloads/connector/j/
-2. Select **Platform Independent** → Download the **.zip** file.
-3. Extract it. Find the file named something like `mysql-connector-j-9.1.0.jar`.
-4. Copy that `.jar` file into the `lib/` folder of this project.
-
-### Step 2 — Create the Database
-
-Open a terminal / command prompt and run:
-
+### 1. Compile the Project
 ```bash
-mysql -u root -p < schema.sql
+javac -cp "lib/*" -d out src/cybershield/model/*.java src/cybershield/util/*.java src/cybershield/dao/*.java src/cybershield/gui/*.java src/cybershield/Main.java
 ```
 
-Or open MySQL Workbench, paste the contents of `schema.sql`, and execute it.
-
-This creates the `cybershield_db` database with all tables and sample data.
-
-### Step 3 — Edit Database Credentials (if needed)
-
-Open `src/cybershield/util/DBConnection.java` and edit the three constants at the top:
-
-```java
-private static final String URL      = "jdbc:mysql://localhost:3306/cybershield_db";
-private static final String USER     = "root";
-private static final String PASSWORD = "";   // ← put your MySQL password here
-```
-
-### Step 4 — Test the Database Connection
-
+### 2. Run the Application
 ```bash
-# From the project root folder:
-
-# Compile just the connection test class
-javac -cp "lib/*" -d out src/cybershield/util/DBConnection.java
-
-# Run the test
-java -cp "out;lib/*" cybershield.util.DBConnection
-```
-
-You should see: `SUCCESS: Connected to cybershield_db!`
-
-> **Note (macOS/Linux):** Replace `;` with `:` in the classpath, e.g. `"out:lib/*"`
-
-### Step 5 — Compile the Full Project
-
-```bash
-javac -cp "lib/*" -d out src/cybershield/util/*.java src/cybershield/model/*.java src/cybershield/dao/*.java src/cybershield/gui/*.java src/cybershield/Main.java
-```
-
-### Step 6 — Run the Application
-
-```bash
+# Windows
 java -cp "out;lib/*" cybershield.Main
+
+# macOS / Linux
+java -cp "out:lib/*" cybershield.Main
 ```
 
-The CyberShield main window should appear, centered on your screen, with the dark theme and five placeholder tabs.
+### 3. Log In
+- **Username:** `admin`
+- **Password:** `admin123`
+- **Role:** `ADMIN`
+
+*(Analyst account: `analyst` / `analyst123`)*
 
 ---
 
-## For Team Members
+## 🏗️ Architecture & Database Auto-Configuration
 
-Each team member should:
-1. Pull this foundation code.
-2. Create their own panel class that **extends `BasePanel`**.
-3. Implement `refreshData()` to load data from the database using the DAO classes.
-4. Replace the placeholder panel in `MainFrame.java`'s `createTabbedPane()` method.
-5. **Never put SQL in GUI classes** — always use the DAO layer.
+The application automatically initializes its database upon startup using `cybershield.util.DatabaseInitializer` and `cybershield.util.DBConnection`:
+
+1. **Dual-Mode Resilient Database:**
+   - **Auto Mode (Default):** Checks if MySQL is reachable at `localhost:3306`. If connected, it automatically runs `CREATE DATABASE IF NOT EXISTS cybershield_db` and connects.
+   - **Zero-Setup Embedded Fallback:** If MySQL is not running or access is denied, CyberShield seamlessly activates an embedded persistent database engine (`./data/cybershield`) without crashing or requiring any manual setup.
+2. **Automatic Idempotent Schema Creation:**
+   - Automatically executes the equivalent of `schema.sql` (`users`, `threats`, `incidents`, `blocked_ips`, `logs`).
+   - Seeds the default admin account and realistic sample data only when tables are first created.
+   - Fully idempotent and non-destructive: existing user records and password changes are preserved across restarts.
+3. **External Configuration:**
+   - Optional database credentials can be configured in `config/db.properties` or environment variables (`CYBERSHIELD_DB_URL`, `CYBERSHIELD_DB_USER`, `CYBERSHIELD_DB_PASS`) without touching Java source code.
 
 ---
 
-## OOP Concepts Used
+## 📁 Project Structure
 
-| Concept         | Where                                              |
-|-----------------|-----------------------------------------------------|
-| Encapsulation   | All model classes (private fields + getters/setters)|
-| Inheritance     | `MainFrame extends JFrame`, all panels `extends BasePanel` |
-| Polymorphism    | `ActionListener.actionPerformed()`, `GenericDAO` implementations |
-| Abstraction     | `GenericDAO<T>` interface, `BasePanel` abstract class |
+```text
+cybershield/
+├── config/
+│   └── db.properties             ← Centralized database configuration
+├── lib/
+│   ├── mysql-connector-j-8.4.0.jar ← MySQL JDBC driver
+│   └── h2-2.3.232.jar             ← Embedded database driver
+├── out/                          ← Compiled bytecode classes
+├── src/cybershield/
+│   ├── Main.java                 ← Application entry point & preflight init
+│   ├── gui/                      ← Swing UI components (Frames, Dialogs, Panels)
+│   ├── model/                    ← Domain entities (User, Threat, Incident, BlockedIP, LogEntry)
+│   ├── dao/                      ← Data Access Objects (Plain JDBC)
+│   └── util/                     ← DatabaseInitializer, DBConnection, Theme, Validator
+├── schema.sql                    ← Reference SQL schema specification
+├── README.md                     ← Project documentation
+└── VIVA_NOTES.md                 ← Viva examination preparation guide
+```
+
+---
+
+## 🎓 Core AOOP Concepts Demonstrated
+
+| Concept | Implementation in CyberShield |
+| :--- | :--- |
+| **Encapsulation** | Private entity fields with typed getters and setters across all model classes. |
+| **Inheritance** | `MainFrame extends JFrame`, dialogs extending `JDialog`, all feature panels extending `BasePanel`. |
+| **Polymorphism** | `GenericDAO<T>` interface implementations (`ThreatDAO`, `IncidentDAO`, `LogDAO`, `BlockedIPDAO`). |
+| **Abstraction** | Separation of UI Presentation (`gui`), Business logic (`util`), and Storage Layer (`dao`). |
+| **Multithreading** | Responsive UI execution with `SwingWorker` and `javax.swing.Timer` for live threat feeds. |
+| **Resilience** | Automatic database fallback and dynamic schema verification preventing runtime failures. |
