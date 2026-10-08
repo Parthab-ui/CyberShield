@@ -40,16 +40,32 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                LoginFrame loginFrame = new LoginFrame();
-                loginFrame.setLoginCallback(new LoginFrame.LoginCallback() {
-                    @Override
-                    public void onLoginSuccess(User user) {
-                        MainFrame mainFrame = new MainFrame();
-                        mainFrame.setCurrentUser(user);
-                        mainFrame.setVisible(true);
-                    }
-                });
-                loginFrame.setVisible(true);
+                try {
+                    System.out.println("[Main] Creating LoginFrame...");
+                    LoginFrame loginFrame = new LoginFrame();
+                    loginFrame.setLoginCallback(new LoginFrame.LoginCallback() {
+                        @Override
+                        public void onLoginSuccess(User user) {
+                            try {
+                                MainFrame mainFrame = new MainFrame();
+                                mainFrame.setCurrentUser(user);
+                                mainFrame.setVisible(true);
+                                mainFrame.toFront();
+                                mainFrame.requestFocus();
+                            } catch (Throwable t) {
+                                System.err.println("[Main] Error displaying MainFrame:");
+                                t.printStackTrace();
+                            }
+                        }
+                    });
+                    loginFrame.setVisible(true);
+                    loginFrame.toFront();
+                    loginFrame.requestFocus();
+                    System.out.println("[Main] LoginFrame displayed successfully.");
+                } catch (Throwable t) {
+                    System.err.println("[Main] Critical GUI launch error:");
+                    t.printStackTrace();
+                }
             }
         });
     }
