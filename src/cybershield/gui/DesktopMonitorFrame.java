@@ -106,9 +106,10 @@ public class DesktopMonitorFrame extends JFrame {
         refreshBtn.setFont(Theme.FONT_BODY);
         refreshBtn.addActionListener(e -> refreshAllData());
 
-        JLabel liveIndicator = new JLabel("● LIVE MONITORING ACTIVE (3s Poll)");
+        JLabel liveIndicator = new JLabel("● LIVE SOC TELEMETRY (3s Poll)");
         liveIndicator.setFont(Theme.FONT_SMALL);
         liveIndicator.setForeground(Theme.SUCCESS);
+        liveIndicator.setToolTipText("Periodic poll of local database events and telemetry");
 
         toolBar.add(tileBtn);
         toolBar.add(cascadeBtn);
@@ -334,5 +335,14 @@ public class DesktopMonitorFrame extends JFrame {
         List<Incident> openIncidents = incidentDAO.getByStatus("OPEN");
         incidentBar.setValue(Math.min(openIncidents.size(), incidentBar.getMaximum()));
         incidentBar.setString(openIncidents.size() + " Open Incidents");
+    }
+
+    /** Cleanly releases timer resources when this frame is disposed. */
+    @Override
+    public void dispose() {
+        if (pollingTimer != null && pollingTimer.isRunning()) {
+            pollingTimer.stop();
+        }
+        super.dispose();
     }
 }

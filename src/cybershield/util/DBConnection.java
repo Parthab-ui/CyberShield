@@ -40,7 +40,6 @@ public class DBConnection {
     private static String activeJdbcUser  = null;
     private static String activeJdbcPass  = null;
 
-    private static Connection connection  = null;
     private static boolean schemaInitialized = false;
 
     // Private constructor prevents instantiation
@@ -171,7 +170,7 @@ public class DBConnection {
             dataDir.mkdirs();
         }
 
-        activeJdbcUrl  = "jdbc:h2:" + embeddedPath + ";MODE=MySQL;DATABASE_TO_LOWER=TRUE";
+        activeJdbcUrl  = "jdbc:h2:" + embeddedPath + ";MODE=MySQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1";
         activeJdbcUser = "sa";
         activeJdbcPass = "";
         activeEngine   = "Embedded Engine (Persistent local file at " + embeddedPath + ")";
@@ -187,35 +186,24 @@ public class DBConnection {
             determineDatabaseTarget();
         }
 
-        if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(activeJdbcUrl, activeJdbcUser, activeJdbcPass);
-        }
-
         if (!schemaInitialized) {
-            DatabaseInitializer.initializeDatabase(connection);
-            schemaInitialized = true;
+            try (Connection initConn = DriverManager.getConnection(activeJdbcUrl, activeJdbcUser, activeJdbcPass)) {
+                DatabaseInitializer.initializeDatabase(initConn);
+                schemaInitialized = true;
+            }
         }
     }
 
     /**
-     * Returns the active shared database connection.
-     * Initializes the connection automatically if it has not been started yet.
+     * Returns an active database connection for the caller.
+     * Thread-safe: provides each caller with an independent connection
+     * that is safely closed by the caller's try-with-resources.
      */
-    public static synchronized Connection getConnection() throws SQLException {
-        if (activeJdbcUrl == null) {
+    public static Connection getConnection() throws SQLException {
+        if (activeJdbcUrl == null || !schemaInitialized) {
             initialize();
         }
-
-        if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(activeJdbcUrl, activeJdbcUser, activeJdbcPass);
-        }
-
-        if (!schemaInitialized) {
-            DatabaseInitializer.initializeDatabase(connection);
-            schemaInitialized = true;
-        }
-
-        return connection;
+        return DriverManager.getConnection(activeJdbcUrl, activeJdbcUser, activeJdbcPass);
     }
 
     /** Returns a readable name of the active database engine (MySQL or Embedded). */
@@ -228,17 +216,9 @@ public class DBConnection {
         return activeEngine != null && activeEngine.startsWith("Embedded");
     }
 
-    /** Closes the database connection if open. */
+    /** Closes any database resources if needed. */
     public static synchronized void closeConnection() {
-        if (connection != null) {
-            try {
-                connection.close();
-                connection = null;
-                System.out.println("[DBConnection] Database connection closed.");
-            } catch (SQLException e) {
-                System.out.println("[DBConnection] Error closing connection: " + e.getMessage());
-            }
-        }
+        System.out.println("[DBConnection] Database resources released.");
     }
 
     /** Diagnostic test runner. */

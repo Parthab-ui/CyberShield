@@ -17,14 +17,19 @@ import java.util.List;
  */
 public class UserDAO {
 
-    /** Inserts a new user into the database. */
+    /** Inserts a new user into the database with SHA-256 password hashing. */
     public void add(User user) {
         String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
+            String pass = user.getPassword();
+            if (pass != null && pass.length() != 64) {
+                pass = hashPassword(pass);
+            }
+
             ps.setString(1, user.getUsername());
-            ps.setString(2, user.getPassword());
+            ps.setString(2, pass);
             ps.setString(3, user.getRole());
             ps.executeUpdate();
             System.out.println("User added: " + user.getUsername());
@@ -85,25 +90,56 @@ public class UserDAO {
     }
 
     /**
+     * Hashes a password using SHA-256 for secure cryptographic storage.
+     */
+    public static String hashPassword(String password) {
+        if (password == null) return null;
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            return password; // Fallback
+        }
+    }
+
+    /**
      * Checks if a username and password combination is valid.
+     * Supports both SHA-256 hashed passwords and legacy plain passwords.
+     * Upgrades legacy plain passwords to SHA-256 hash automatically upon successful login.
      * Returns the User object if login is successful, or null if it fails.
      */
     public User validateLogin(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, username);
-            ps.setString(2, password);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("password"),
-                        rs.getString("role"),
-                        rs.getTimestamp("created_at")
-                    );
+                    String stored = rs.getString("password");
+                    String hashedInput = hashPassword(password);
+                    boolean match = (stored != null) && (stored.equals(password) || stored.equalsIgnoreCase(hashedInput));
+                    if (match) {
+                        int id = rs.getInt("id");
+                        // If password was stored in plain text, silently upgrade it to hash
+                        if (stored != null && !stored.equalsIgnoreCase(hashedInput)) {
+                            updatePassword(id, password);
+                        }
+                        return new User(
+                            id,
+                            rs.getString("username"),
+                            hashedInput,
+                            rs.getString("role"),
+                            rs.getTimestamp("created_at")
+                        );
+                    }
                 }
             }
 
@@ -198,14 +234,17 @@ public class UserDAO {
     }
 
     /**
-     * Updates a user's password.
+     * Updates a user's password with SHA-256 hashing.
      */
     public boolean updatePassword(int userId, String newPassword) {
         String sql = "UPDATE users SET password = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, newPassword);
+            String pass = (newPassword != null && newPassword.length() == 64)
+                    ? newPassword
+                    : hashPassword(newPassword);
+            ps.setString(1, pass);
             ps.setInt(2, userId);
             int rows = ps.executeUpdate();
             return rows > 0;

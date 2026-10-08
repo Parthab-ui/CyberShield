@@ -65,6 +65,14 @@ public class SeverityCellRenderer extends DefaultTableCellRenderer {
                     default:         setForeground(Theme.TEXT_PRIMARY); break;
                 }
             }
+        } else {
+            setText("");
+            if (isSelected) {
+                setBackground(Theme.ACCENT.darker().darker());
+            } else {
+                setBackground(row % 2 == 0 ? Theme.PANEL_BG : Theme.TABLE_ROW_ALT);
+            }
+            setForeground(Theme.TEXT_PRIMARY);
         }
 
         return this;

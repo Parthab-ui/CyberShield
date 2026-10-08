@@ -1004,9 +1004,10 @@ public class ThreatMonitorPanel extends BasePanel {
         statusLabel.setFont(Theme.FONT_SMALL);
         statusLabel.setForeground(Theme.TEXT_SECONDARY);
 
-        startScanButton  = new JButton("▶ Start Scan");
+        startScanButton  = new JButton("▶ Start Scan (Simulated)");
         cancelScanButton = new JButton("■ Cancel Scan");
         Theme.styleButton(startScanButton);
+        startScanButton.setToolTipText("Run simulated packet inspection to discover synthetic test threats");
         Theme.styleButton(cancelScanButton);
         cancelScanButton.setBackground(Theme.PANEL_BG);
         cancelScanButton.setForeground(Theme.TEXT_SECONDARY);
@@ -1044,7 +1045,7 @@ public class ThreatMonitorPanel extends BasePanel {
         startScanButton.setEnabled(false);
         cancelScanButton.setEnabled(true);
         scanProgressBar.setValue(0);
-        statusLabel.setText("Scanning network traffic...");
+        statusLabel.setText("Scanning simulated network traffic...");
 
         currentScanWorker = new ThreatScanWorker();
         currentScanWorker.execute(); // Run on background worker thread
@@ -1077,7 +1078,7 @@ public class ThreatMonitorPanel extends BasePanel {
             if (!chunks.isEmpty()) {
                 int latestProgress = chunks.get(chunks.size() - 1);
                 scanProgressBar.setValue(latestProgress);
-                statusLabel.setText("Scanning network packets... " + latestProgress + "%");
+                statusLabel.setText("Scanning simulated network packets... " + latestProgress + "%");
             }
         }
 
@@ -1118,12 +1119,13 @@ public class ThreatMonitorPanel extends BasePanel {
                 "Network scan completed: " + threatCount + " new threats detected"));
 
             scanProgressBar.setValue(100);
-            statusLabel.setText("Scan complete. Detected " + threatCount + " new threats.");
+            statusLabel.setText("Simulated scan complete. Discovered " + threatCount + " sample threats.");
             refreshData();
 
             JOptionPane.showMessageDialog(ThreatMonitorPanel.this,
-                "Scan complete! Discovered " + threatCount + " new threats.",
-                "Scan Finished", JOptionPane.INFORMATION_MESSAGE);
+                "Simulated network scan complete! Discovered " + threatCount + " sample threats.\n"
+                + "(Synthetic security telemetry generated for evaluation)",
+                "Simulated Scan Finished", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

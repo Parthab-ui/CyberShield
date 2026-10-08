@@ -6,28 +6,43 @@
 
 | Class | Purpose |
 |---|---|
-| `Main` | Entry point — starts the application on the Event Dispatch Thread |
-| `DBConnection` | Provides a singleton-style shared MySQL connection using JDBC |
-| `Theme` | Stores all UI colors, fonts, and button/panel styling methods |
-| `Validator` | Provides simple input validation (empty check, IP format, password length) |
-| `User` | Model class representing a system user (admin or analyst) |
+| `Main` | Entry point — pre-flights database initialization and starts GUI on EDT |
+| `DBConnection` | Centralized database connection manager with dual-mode auto-fallback |
+| `DatabaseInitializer` | Programmatically creates schemas/tables and idempotently seeds default data |
+| `Theme` | Stores dark palette colors, fonts, and button/panel styling methods |
+| `ThemeSettings` | Runtime preferences (dark/light mode, font scaling, timeout) |
+| `AppSettings` | Application-wide settings (alert sensitivity, auto-refresh interval) |
+| `Validator` | Input validation (empty check, IPv4 format check, password length) |
+| `User` | Model class representing a system user (Admin or Analyst) |
 | `Threat` | Model class representing a detected cybersecurity threat |
 | `Incident` | Model class representing an incident report linked to a threat |
 | `BlockedIP` | Model class representing a blocked IP address |
-| `LogEntry` | Model class representing one audit log record |
-| `GenericDAO<T>` | Interface defining the five standard CRUD operations for any model |
-| `UserDAO` | Handles all database operations for the users table |
-| `ThreatDAO` | Handles all database operations for the threats table (implements GenericDAO) |
-| `IncidentDAO` | Handles all database operations for the incidents table (implements GenericDAO) |
-| `BlockedIPDAO` | Handles all database operations for the blocked_ips table (implements GenericDAO) |
-| `LogDAO` | Handles all database operations for the logs table (implements GenericDAO) |
-| `BasePanel` | Abstract JPanel with an abstract `refreshData()` method — every tab panel extends this |
-| `MainFrame` | Main application window with menu bar, toolbar, tabbed pane, and status bar |
-| `DashboardPanel` | Placeholder panel for the Dashboard tab (extends BasePanel) |
-| `ThreatMonitorPanel` | Placeholder panel for the Threat Monitor tab (extends BasePanel) |
-| `IncidentsPanel` | Placeholder panel for the Incidents tab (extends BasePanel) |
-| `ReportsPanel` | Placeholder panel for the Reports tab (extends BasePanel) |
-| `SettingsPanel` | Placeholder panel for the Settings tab (extends BasePanel) |
+| `LogEntry` | Model class representing an audit log record |
+| `GenericDAO<T>` | Generic interface defining standard CRUD operations |
+| `UserDAO` | Handles database operations for users table with SHA-256 password hashing |
+| `ThreatDAO` | Handles database operations for threats table (implements GenericDAO) |
+| `IncidentDAO` | Handles database operations for incidents table (implements GenericDAO) |
+| `BlockedIPDAO` | Handles database operations for blocked_ips table (implements GenericDAO) |
+| `LogDAO` | Handles database operations for logs table (implements GenericDAO) |
+| `StatsDAO` | Aggregates analytical counts and severity metrics for dashboard cards and charts |
+| `BasePanel` | Abstract JPanel with abstract `refreshData()` method — every tab panel extends this |
+| `MainFrame` | Main application window with menu bar, toolbar, central tabs, and status bar |
+| `LoginFrame` | Authentication window with lockout countdown and role verification |
+| `RegisterDialog` | Modal dialog for new analyst account registration |
+| `DashboardPanel` | Executive dashboard with metrics, progress indicators, and severity chart |
+| `ThreatGraphPanel` | Custom-painted Graphics2D bar chart for threat severity distribution |
+| `ThreatMonitorPanel` | Threat management panel with table, network tree, filtering, and simulated scanner |
+| `ThreatTableModel` | Custom AbstractTableModel for sorting and presenting threat records |
+| `SeverityCellRenderer` | Custom TableCellRenderer coloring threat severity tiers |
+| `AddThreatDialog` | Modal dialog for recording new threat telemetry with IPv4 validation |
+| `IncidentPanel` | Incident response management with status filtering and details viewer |
+| `IncidentTableModel` | Custom AbstractTableModel for incident tickets |
+| `StatusCellRenderer` | Custom TableCellRenderer coloring incident and priority states |
+| `IncidentDialog` | Modal dialog for creating, editing, and escalating incident tickets |
+| `ReportPanel` | Multi-format reporting interface with CardLayout presentation |
+| `ReportGenerator` | Utility compiling HTML executive summaries and plain text audit reports |
+| `SettingsPanel` | Settings tab managing theme customization, alerts, and password updates |
+| `DesktopMonitorFrame` | Secondary MDI (Multiple Document Interface) window with live feed and health monitor |
 
 ---
 
@@ -106,9 +121,15 @@ Try-with-resources is a Java feature (since Java 7) that automatically closes re
 - It is shorter and cleaner than manually writing `finally { conn.close(); }`.
 - The resource must implement the `AutoCloseable` interface (JDBC classes do).
 
-### Q10. Why do we use a Singleton pattern for DBConnection?
+### Q10. How does DBConnection handle thread safety and multi-engine resilience?
 **Answer:**  
-The Singleton pattern ensures only **one database connection** is shared across the entire application. Creating a new connection for every query is slow and wastes resources. With `DBConnection.getConnection()`, we reuse the same connection. The constructor is `private` so nobody can create a second `DBConnection` object. The `getConnection()` method checks if the connection already exists (or has been closed) and creates one only if needed.
+`DBConnection` centralizes database configuration and driver resolution with automatic fallback:
+1. **Thread-Safe Connections**: Each DAO method opens its own connection using `try (Connection conn = DBConnection.getConnection())` and closes it via try-with-resources. This ensures parallel threads (e.g. background SwingWorkers or polling Timers) never close a shared connection out from under another thread.
+2. **Dual-Engine Resilience**: It probes MySQL on `localhost:3306`. If MySQL is unavailable or password-restricted, it seamlessly activates an embedded persistent H2 database (`./data/cybershield`) so the application never crashes from missing server setups.
+
+### Q11. How are user passwords protected in CyberShield?
+**Answer:**  
+User passwords are protected using standard **SHA-256 cryptographic hashing** via `java.security.MessageDigest`. When a user registers or changes their password, only the 64-character hexadecimal hash is stored in the database. During login, the input is hashed and compared against the stored hash. For backward compatibility with legacy demo setups, the system also verifies legacy passwords and automatically upgrades them to SHA-256 hashes on successful authentication.
 
 ---
 
