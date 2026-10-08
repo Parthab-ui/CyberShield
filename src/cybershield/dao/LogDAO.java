@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,5 +115,50 @@ public class LogDAO implements GenericDAO<LogEntry> {
             rs.getString("action"),
             rs.getTimestamp("log_time")
         );
+    }
+
+    /**
+     * Retrieves audit log records recorded between two timestamps.
+     */
+    public List<LogEntry> getLogsBetween(Timestamp start, Timestamp end) {
+        List<LogEntry> logs = new ArrayList<>();
+        String sql = "SELECT * FROM logs WHERE log_time BETWEEN ? AND ? ORDER BY log_time DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, start);
+            ps.setTimestamp(2, end);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    logs.add(extractLogEntry(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching logs between dates: " + e.getMessage());
+        }
+        return logs;
+    }
+
+    /**
+     * Retrieves audit log records from the past N days.
+     */
+    public List<LogEntry> getRecentLogs(int days) {
+        List<LogEntry> logs = new ArrayList<>();
+        String sql = "SELECT * FROM logs WHERE log_time >= DATE_SUB(NOW(), INTERVAL ? DAY) ORDER BY log_time DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, days);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    logs.add(extractLogEntry(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching recent logs: " + e.getMessage());
+        }
+        return logs;
     }
 }

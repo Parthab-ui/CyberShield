@@ -134,4 +134,85 @@ public class UserDAO {
         }
         return false;
     }
+
+    /**
+     * Returns a list of all usernames for assigning incidents.
+     */
+    public List<String> getAllUsernames() {
+        List<String> usernames = new ArrayList<>();
+        String sql = "SELECT username FROM users ORDER BY username ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                usernames.add(rs.getString("username"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching usernames: " + e.getMessage());
+        }
+        return usernames;
+    }
+
+    /**
+     * Returns the user ID for a given username, or 1 as fallback.
+     */
+    public int getUserIdByUsername(String username) {
+        String sql = "SELECT id FROM users WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching user ID by username: " + e.getMessage());
+        }
+        return 1;
+    }
+
+    /**
+     * Returns the username for a given user ID.
+     */
+    public String getUsernameById(int id) {
+        String sql = "SELECT username FROM users WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching username by ID: " + e.getMessage());
+        }
+        return "User #" + id;
+    }
+
+    /**
+     * Updates a user's password.
+     */
+    public boolean updatePassword(int userId, String newPassword) {
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, newPassword);
+            ps.setInt(2, userId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Error updating password: " + e.getMessage());
+        }
+        return false;
+    }
 }

@@ -137,4 +137,105 @@ public class IncidentDAO implements GenericDAO<Incident> {
             rs.getTimestamp("closed_at")
         );
     }
+
+    /**
+     * Searches incidents across title and description keywords.
+     */
+    public List<Incident> search(String keyword) {
+        List<Incident> list = new ArrayList<>();
+        String sql = "SELECT * FROM incidents WHERE title LIKE ? OR description LIKE ? ORDER BY created_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            String term = "%" + keyword + "%";
+            ps.setString(1, term);
+            ps.setString(2, term);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(extractIncident(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error searching incidents: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * Returns incidents matching a specific status (OPEN, IN_PROGRESS, CLOSED).
+     */
+    public List<Incident> getByStatus(String status) {
+        List<Incident> list = new ArrayList<>();
+        String sql = "SELECT * FROM incidents WHERE status = ? ORDER BY created_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(extractIncident(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching incidents by status: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * Assigns an incident to a specified user ID.
+     */
+    public void assignTo(int incidentId, int userId) {
+        String sql = "UPDATE incidents SET assigned_to = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, incidentId);
+            ps.executeUpdate();
+            System.out.println("Incident #" + incidentId + " assigned to user #" + userId);
+
+        } catch (SQLException e) {
+            System.out.println("Error assigning incident: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Marks an incident as CLOSED and sets the closed_at timestamp to now.
+     */
+    public void closeIncident(int incidentId) {
+        String sql = "UPDATE incidents SET status = 'CLOSED', closed_at = CURRENT_TIMESTAMP WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, incidentId);
+            ps.executeUpdate();
+            System.out.println("Incident #" + incidentId + " closed");
+
+        } catch (SQLException e) {
+            System.out.println("Error closing incident: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Updates an incident status (OPEN, IN_PROGRESS, CLOSED) and adjusts closed_at accordingly.
+     */
+    public void updateStatus(int incidentId, String status) {
+        String sql = status.equals("CLOSED")
+            ? "UPDATE incidents SET status = ?, closed_at = CURRENT_TIMESTAMP WHERE id = ?"
+            : "UPDATE incidents SET status = ?, closed_at = NULL WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, incidentId);
+            ps.executeUpdate();
+            System.out.println("Incident #" + incidentId + " status updated to " + status);
+
+        } catch (SQLException e) {
+            System.out.println("Error updating incident status: " + e.getMessage());
+        }
+    }
 }
