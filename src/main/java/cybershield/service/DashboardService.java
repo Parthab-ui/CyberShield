@@ -1,0 +1,150 @@
+package cybershield.service;
+
+import cybershield.database.DatabaseManager;
+import cybershield.model.DashboardStats;
+import cybershield.model.Incident;
+import cybershield.model.SecurityAlert;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+/**
+ * DashboardService — Aggregates live statistical indicators from SQLite.
+ * Calculates totals, severity distributions, unauthorized access frequencies,
+ * and automated intrusion detection metrics for both Web and Desktop dashboards.
+ */
+public class DashboardService {
+
+    private final IncidentService incidentService;
+    private final ActivityLogService activityLogService;
+    private final IntrusionDetectionService intrusionDetectionService;
+
+    public DashboardService() {
+        this.incidentService = new IncidentService();
+        this.activityLogService = new ActivityLogService();
+        this.intrusionDetectionService = new IntrusionDetectionService();
+    }
+
+    public DashboardService(IncidentService incidentService,
+                            ActivityLogService activityLogService,
+                            IntrusionDetectionService intrusionDetectionService) {
+        this.incidentService = incidentService;
+        this.activityLogService = activityLogService;
+        this.intrusionDetectionService = intrusionDetectionService;
+    }
+
+    /**
+     * Gathers current aggregated metrics directly from stored database rows.
+     * Never returns hardcoded metrics.
+     */
+    public DashboardStats getStats() {
+        int total = 0;
+        int open = 0;
+        int critical = 0;
+        int unauthorized = 0;
+        int highCritical = 0;
+        int activeBlockedIps = 0;
+        int lockedAccounts = 0;
+        int successfulThreatResponses = 0;
+        int failedThreatResponses = 0;
+
+        long now = System.currentTimeMillis();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // 1. Total incidents count
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM incidents")) {
+                if (rs.next()) total = rs.getInt(1);
+            }
+
+            // 2. Open / Investigating incidents count
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM incidents WHERE UPPER(status) IN ('OPEN', 'INVESTIGATING')")) {
+                if (rs.next()) open = rs.getInt(1);
+            }
+
+            // 3. Critical incidents count
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM incidents WHERE UPPER(severity) = 'CRITICAL'")) {
+                if (rs.next()) critical = rs.getInt(1);
+            }
+
+            // 3b. High & Critical incidents count
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM incidents WHERE UPPER(severity) IN ('HIGH', 'CRITICAL')")) {
+                if (rs.next()) highCritical = rs.getInt(1);
+            }
+
+            // 4. Unauthorized access / blocked events count
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM access_events WHERE UPPER(result) IN ('FAILED', 'BLOCKED')")) {
+                if (rs.next()) unauthorized = rs.getInt(1);
+            }
+
+            // 5. Active Blocked IPs
+            try (var pstmt = conn.prepareStatement("SELECT COUNT(*) FROM blocked_ips WHERE status = 'ACTIVE' AND (expires_at IS NULL OR expires_at > ?)")) {
+                pstmt.setLong(1, now);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) activeBlockedIps = rs.getInt(1);
+                }
+            }
+
+            // 6. Locked User Accounts
+            try (var pstmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE is_locked = 1 AND (locked_until = 0 OR locked_until > ?)")) {
+                pstmt.setLong(1, now);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) lockedAccounts = rs.getInt(1);
+                }
+            }
+
+            // 7. Successful Threat Responses
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM threat_responses WHERE UPPER(status) IN ('EXECUTED', 'ALREADY_ACTIVE')")) {
+                if (rs.next()) successfulThreatResponses = rs.getInt(1);
+            }
+
+            // 8. Failed Threat Responses
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM threat_responses WHERE UPPER(status) = 'FAILED'")) {
+                if (rs.next()) failedThreatResponses = rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("[DashboardService] Error compiling dashboard statistics: " + e.getMessage());
+        }
+
+        // Review 2 Intrusion Detection Metrics
+        int totalDetectedThreats = intrusionDetectionService.getTotalDetectedThreats();
+        int activeSecurityAlerts = intrusionDetectionService.getActiveAlertsCount();
+        int autoGeneratedIncidents = intrusionDetectionService.getAutoIncidentsCount();
+        SecurityAlert latestAlert = intrusionDetectionService.getLatestAlert();
+        List<SecurityAlert> recentAlerts = intrusionDetectionService.getRecentAlerts(5);
+
+        // Recent 5 incidents
+        List<Incident> allIncidents = incidentService.getAll(null, null, null);
+        List<Incident> recentIncidents = allIncidents.size() > 5 ? allIncidents.subList(0, 5) : allIncidents;
+
+        // Recent 5 activity logs
+        var recentActivities = activityLogService.getAll(5);
+
+        DashboardStats stats = new DashboardStats(
+                total,
+                open,
+                critical,
+                unauthorized,
+                totalDetectedThreats,
+                activeSecurityAlerts,
+                autoGeneratedIncidents,
+                latestAlert,
+                recentAlerts,
+                recentIncidents,
+                recentActivities
+        );
+
+        stats.setActiveBlockedIps(activeBlockedIps);
+        stats.setLockedAccounts(lockedAccounts);
+        stats.setSuccessfulThreatResponses(successfulThreatResponses);
+        stats.setFailedThreatResponses(failedThreatResponses);
+        stats.setHighCriticalIncidents(highCritical);
+
+        return stats;
+    }
+}

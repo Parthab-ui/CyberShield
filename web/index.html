@@ -1,0 +1,2733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield — Cybersecurity Monitoring & Incident Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Authentication Overlay Modal -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-card login-card">
+            <div class="login-header">
+                <div class="shield-icon">🛡️</div>
+                <h2>CyberShield Portal</h2>
+                <p class="subtitle">Cybersecurity Monitoring & Incident Management System</p>
+                <span class="badge badge-accent">B.Tech CSE Project Edition</span>
+            </div>
+
+            <div id="login-error" class="alert-box alert-error" style="display: none;"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" placeholder="Enter username (e.g. admin)" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter password" required autocomplete="current-password">
+                </div>
+
+                <div class="login-actions">
+                    <button type="submit" class="btn btn-primary btn-block" id="btn-login-submit">Sign In</button>
+                    <button type="button" class="btn btn-secondary btn-block" id="btn-login-clear">Clear</button>
+                </div>
+
+                <div class="demo-accounts-panel">
+                    <p class="demo-title">Quick Demo Logins (College Review):</p>
+                    <div class="demo-buttons">
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-fill-admin">👤 Fill Admin (admin / Admin@123)</button>
+                        <button type="button" class="btn btn-sm btn-outline" id="btn-fill-analyst">🔍 Fill Analyst (analyst / Analyst@123)</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Shell -->
+    <div id="app-shell" class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-area">
+                    <span class="logo-icon">🛡️</span>
+                    <div>
+                        <h1 class="logo-title">CyberShield</h1>
+                        <span class="logo-sub">SOC Console</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-target="view-dashboard">
+                    <span class="nav-icon">📊</span> Overview Dashboard
+                </a>
+                <a href="#incidents" class="nav-item" data-target="view-incidents">
+                    <span class="nav-icon">🚨</span> Incident Management
+                </a>
+                <a href="#threat-response" class="nav-item" data-target="view-threat-response">
+                    <span class="nav-icon">🛡️</span> Threat Response Center
+                </a>
+                <a href="#investigation" class="nav-item" data-target="view-investigation">
+                    <span class="nav-icon">🔬</span> Investigation Center
+                </a>
+                <a href="#activity" class="nav-item" data-target="view-activity">
+                    <span class="nav-icon">📜</span> Activity History
+                </a>
+                <a href="#account-security" class="nav-item" data-target="view-account-security">
+                    <span class="nav-icon">🔑</span> Account Security
+                </a>
+                <a href="#access" class="nav-item" data-target="view-access">
+                    <span class="nav-icon">🔒</span> Access Monitoring
+                </a>
+                <a href="#component-lab" class="nav-item" data-target="view-lab">
+                    <span class="nav-icon">🧪</span> Swing Component Lab
+                </a>
+                <a href="#about" class="nav-item" data-target="view-about">
+                    <span class="nav-icon">ℹ️</span> About & Team
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Backend Connected</span>
+                </div>
+                <div class="db-indicator">SQLite DB: cybershield.db</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top App Bar -->
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span id="page-title">Executive Dashboard</span>
+                </div>
+
+                <div class="user-profile-bar">
+                    <div class="user-badge">
+                        <span class="user-icon">👤</span>
+                        <div class="user-meta">
+                            <span id="header-username" class="user-name">Loading...</span>
+                            <span id="header-role" class="badge badge-role">ROLE</span>
+                        </div>
+                    </div>
+                    <button id="btn-logout" class="btn btn-sm btn-danger-outline">Sign Out</button>
+                </div>
+            </header>
+
+            <div class="content-container">
+                <!-- VIEW 1: DASHBOARD -->
+                <section id="view-dashboard" class="content-view active">
+                    <div class="view-header">
+                        <h2>Real-Time Security Posture</h2>
+                        <button class="btn btn-sm btn-secondary" id="btn-refresh-dashboard">🔄 Refresh Metrics</button>
+                    </div>
+
+                    <!-- Review 2: Dedicated Rule-Based Security Alert Banner -->
+                    <div id="security-alert-banner" class="security-alert-banner">
+                        <div class="alert-banner-header">
+                            <div class="alert-title-wrap">
+                                <span class="alert-pulse-dot" id="alert-dot"></span>
+                                <span class="alert-category-tag" id="alert-category">SECURITY ALERT</span>
+                                <h3 id="alert-title">BRUTE FORCE ATTACK DETECTED</h3>
+                            </div>
+                            <span id="alert-badge" class="badge badge-critical">HIGH SEVERITY</span>
+                        </div>
+                        <div class="alert-banner-details">
+                            <div class="alert-detail-item">
+                                <span class="detail-label">Source IP Address</span>
+                                <span class="detail-value text-mono text-amber" id="alert-ip">192.168.1.105</span>
+                            </div>
+                            <div class="alert-detail-item">
+                                <span class="detail-label">Failed Attempts</span>
+                                <span class="detail-value text-red" id="alert-attempts">5 Attempts</span>
+                            </div>
+                            <div class="alert-detail-item">
+                                <span class="detail-label">Threat Severity</span>
+                                <span class="detail-value text-red" id="alert-severity">HIGH</span>
+                            </div>
+                            <div class="alert-detail-item">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-value" id="alert-status">OPEN</span>
+                            </div>
+                            <div class="alert-detail-item">
+                                <span class="detail-label">Detection Time</span>
+                                <span class="detail-value text-mono" id="alert-timestamp">--</span>
+                            </div>
+                        </div>
+                        <div class="alert-banner-footer">
+                            <span class="alert-rule-note" id="alert-rule-note">Rule: 5 failed login attempts within 2 minutes triggered automated incident generation.</span>
+                            <button class="btn btn-sm btn-outline" id="btn-view-alert-incident" onclick="navigateTo('view-incidents')">View Auto-Generated Incident →</button>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Cards Grid (Review 3 Upgraded) -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon icon-blue">📋</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Total Incidents</span>
+                                <h3 class="metric-value" id="stat-total">0</h3>
+                                <span class="metric-hint">Tracked in database</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-amber">⏳</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Open / Active</span>
+                                <h3 class="metric-value" id="stat-open">0</h3>
+                                <span class="metric-hint">Requiring triage</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-red">🔥</div>
+                            <div class="metric-body">
+                                <span class="metric-label">High / Critical</span>
+                                <h3 class="metric-value" id="stat-high-critical">0</h3>
+                                <span class="metric-hint">Severe & Urgent</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-rose">🛡️</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Brute-Force Attacks</span>
+                                <h3 class="metric-value" id="stat-threats">0</h3>
+                                <span class="metric-hint">Automated IDS detections</span>
+                            </div>
+                        </div>
+
+                        <!-- Review 3: Defensive Countermeasures Metrics -->
+                        <div class="metric-card">
+                            <div class="metric-icon icon-purple">🚫</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Active Blocked IPs</span>
+                                <h3 class="metric-value" id="stat-blocked-ips">0</h3>
+                                <span class="metric-hint">Firewall contained</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-red">🔒</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Locked Accounts</span>
+                                <h3 class="metric-value" id="stat-locked-accounts">0</h3>
+                                <span class="metric-hint">Protected against spray</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-emerald">⚡</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Successful Defenses</span>
+                                <h3 class="metric-value" id="stat-success-responses">0</h3>
+                                <span class="metric-hint">Threat responses applied</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-amber">⚠️</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Failed Responses</span>
+                                <h3 class="metric-value" id="stat-failed-responses">0</h3>
+                                <span class="metric-hint">Exceptions / Malformed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Feeds Grid -->
+                    <div class="dashboard-split-grid">
+                        <!-- Left: Recent Incidents -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>Recent Security Incidents</h3>
+                                <a href="#incidents" class="btn-link" onclick="navigateTo('view-incidents')">View All →</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="dashboard-incidents-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Title</th>
+                                            <th>Severity</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboard-incidents-body">
+                                        <tr><td colspan="5" class="text-center">Loading incidents...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right: Activity Timeline -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>Live SOC Audit Feed</h3>
+                                <a href="#activity" class="btn-link" onclick="navigateTo('view-activity')">Full History →</a>
+                            </div>
+                            <div class="timeline" id="dashboard-activity-list">
+                                <div class="text-center py-4">Loading audit feed...</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: THREAT RESPONSE CENTER (Review 3 Phase 6B) -->
+                <section id="view-threat-response" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Threat Response Center</h2>
+                            <p class="section-desc">Active application-level firewall, defensive countermeasures, and mitigation audit telemetry.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-threat-response">🔄 Refresh Defense Telemetry</button>
+                    </div>
+
+                    <!-- Top Split: Manual Blocking & Blocked IPs Table -->
+                    <div class="dashboard-split-grid mb-4">
+                        <!-- Manual IP Block Form -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🛡️ Manual Firewall IP Containment</h3>
+                                <span class="badge badge-accent">Admin Authority</span>
+                            </div>
+                            <form id="form-manual-block" class="p-3">
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-address">Target IPv4 / IPv6 Address *</label>
+                                    <input type="text" id="block-ip-address" class="form-control" placeholder="e.g. 198.51.100.44" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-reason">Security Justification / Reason *</label>
+                                    <input type="text" id="block-ip-reason" class="form-control" placeholder="e.g. Hostile credential spray detected" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-duration">Containment Duration</label>
+                                    <select id="block-ip-duration" class="select-input">
+                                        <option value="15" selected>15 Minutes (Standard Policy)</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="1440">24 Hours</option>
+                                        <option value="0">Permanent Block</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-block" id="btn-submit-ip-block">Enforce IP Block</button>
+                            </form>
+                        </div>
+
+                        <!-- Active Blocked IPs Table -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🚫 Contained / Blocked IP Addresses</h3>
+                                <div class="filter-group-inline">
+                                    <select id="filter-blocked-status" class="select-input select-sm">
+                                        <option value="ALL">All Records</option>
+                                        <option value="ACTIVE" selected>Active Blocks Only</option>
+                                        <option value="EXPIRED">Expired</option>
+                                        <option value="UNBLOCKED">Manually Unblocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="blocked-ips-table">
+                                    <thead>
+                                        <tr>
+                                            <th>IP Address</th>
+                                            <th>Reason</th>
+                                            <th>Blocked At</th>
+                                            <th>Expires In</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blocked-ips-tbody">
+                                        <tr><td colspan="6" class="text-center py-4">Loading blocked IPs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Threat Response History -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>📜 Automated & Manual Defense Execution History</h3>
+                                <p class="text-muted text-sm">Auditable history of containment actions executed by the Intrusion Detection System.</p>
+                            </div>
+                            <div class="filter-group-inline">
+                                <input type="text" id="filter-threat-ip" class="input-sm" placeholder="Filter by Target IP...">
+                                <select id="filter-threat-status" class="select-input select-sm">
+                                    <option value="ALL">All Response Statuses</option>
+                                    <option value="EXECUTED">EXECUTED</option>
+                                    <option value="ALREADY_ACTIVE">ALREADY_ACTIVE</option>
+                                    <option value="SKIPPED_WHITELIST">SKIPPED_WHITELIST</option>
+                                    <option value="FAILED">FAILED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="threat-responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Incident</th>
+                                        <th>Threat Type</th>
+                                        <th>Action Taken</th>
+                                        <th>Target Identifier</th>
+                                        <th>Outcome</th>
+                                        <th>Executed At</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threat-responses-tbody">
+                                    <tr><td colspan="8" class="text-center py-4">Loading threat response history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: INVESTIGATION CENTER (Review 3 Phase 6B) -->
+                <section id="view-investigation" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Investigation & Forensic Triage Center</h2>
+                            <p class="section-desc">Collaborative case dossiers, technical forensic notes, structured JSON telemetry, and incident resolution workflow.</p>
+                        </div>
+                        <div class="filter-group-inline">
+                            <label for="investigation-incident-select" style="font-weight:600; color:var(--text-secondary);">Select Case:</label>
+                            <select id="investigation-incident-select" class="select-input">
+                                <option value="">-- Choose Incident to Investigate --</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-investigation">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Case Dossier Header Card -->
+                    <div id="investigation-case-dossier" class="card p-4 mb-4" style="display:none;">
+                        <div class="dossier-top-bar">
+                            <div>
+                                <span class="badge badge-accent mb-1" id="dossier-id-badge">Incident #--</span>
+                                <h2 id="dossier-title" style="margin:4px 0; color:#f8fafc;">Select an incident</h2>
+                                <p id="dossier-desc" class="text-muted" style="margin-bottom:8px;">Technical details...</p>
+                                <div class="dossier-meta-tags">
+                                    <span id="dossier-severity-badge" class="badge">-- SEVERITY</span>
+                                    <span id="dossier-status-badge" class="badge">STATUS: --</span>
+                                    <span class="badge badge-secondary">Reported By: <strong id="dossier-author">--</strong></span>
+                                    <span class="badge badge-secondary">Created: <span id="dossier-created" class="text-mono">--</span></span>
+                                </div>
+                            </div>
+                            <div class="dossier-kpi-summary">
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Lead Investigator</span>
+                                    <span class="kpi-mini-val" id="dossier-assigned">Unassigned</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Root Cause</span>
+                                    <span class="kpi-mini-val text-amber" id="dossier-root-cause">Undetermined</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Forensic Notes</span>
+                                    <span class="kpi-mini-val text-cyan" id="dossier-total-notes">0</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Defensive Actions</span>
+                                    <span class="kpi-mini-val text-emerald" id="dossier-total-responses">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Summary Notice if resolved -->
+                        <div id="dossier-resolution-box" class="resolution-notice-box mt-3" style="display:none;">
+                            <strong>✅ Technical Resolution Documented:</strong>
+                            <p id="dossier-resolution-text" style="margin:4px 0;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Prompt -->
+                    <div id="investigation-empty-state" class="card text-center p-5">
+                        <div style="font-size:48px; margin-bottom:12px;">🔬</div>
+                        <h3>No Incident Selected for Forensic Triage</h3>
+                        <p class="text-muted">Select an incident from the dropdown above, or click "Investigate" in the Incident Management table.</p>
+                    </div>
+
+                    <!-- Active Investigation Workspace Grid -->
+                    <div id="investigation-workspace" class="dashboard-split-grid" style="display:none;">
+                        <!-- Left Column: Notes & JSON Evidence -->
+                        <div class="investigation-left-col">
+                            <!-- Notes Feed -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>📝 Forensic Notes & Evidence Log</h3>
+                                    <span class="badge badge-secondary" id="notes-count-badge">0 Notes</span>
+                                </div>
+                                <div id="investigation-notes-list" class="notes-feed-container p-3">
+                                    <p class="text-muted text-center py-4">No investigation notes recorded yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>➕ Append Investigation Note & Structured Evidence</h3>
+                                </div>
+                                <form id="form-add-investigation-note" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="inv-note-narrative">Technical Narrative / Observation *</label>
+                                        <textarea id="inv-note-narrative" rows="3" class="form-control" placeholder="Document triage findings, port scan details, or containment steps taken..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <label for="inv-evidence-data" style="margin:0;">Structured JSON Evidence Payload (Optional)</label>
+                                            <div class="evidence-preset-buttons">
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-login">Preset: Login Activity</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-ip">Preset: Source IP</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-alert">Preset: Security Alert</button>
+                                            </div>
+                                        </div>
+                                        <textarea id="inv-evidence-data" rows="4" class="form-control text-mono" placeholder='{"evidenceType": "LOGIN_ACTIVITY", "sourceIp": "198.51.100.50", "attempts": 5}'></textarea>
+                                        <small class="text-muted">Must be valid JSON syntax or empty (maximum payload: 64 KB).</small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn-submit-inv-note">Save Investigation Note</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Case Controls & Chronological Timeline -->
+                        <div class="investigation-right-col">
+                            <!-- Case Ownership & Classification Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>⚖️ Investigator Assignment & Root Cause</h3>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Assignment Form -->
+                                    <form id="form-assign-investigator" class="mb-4">
+                                        <label for="assign-investigator-select" style="font-weight:600;">Assign Lead Investigator (Admin Authority):</label>
+                                        <div style="display:flex; gap:8px; margin-top:6px;">
+                                            <select id="assign-investigator-select" class="select-input" style="flex:1;">
+                                                <option value="">-- Select Investigator --</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm" id="btn-submit-assignment">Assign</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Root Cause Classification Form -->
+                                    <form id="form-root-cause">
+                                        <label for="root-cause-category" style="font-weight:600;">Suspected Root Cause Classification:</label>
+                                        <div style="margin-top:6px;">
+                                            <select id="root-cause-category" class="select-input mb-2" style="width:100%;">
+                                                <option value="BRUTE_FORCE_ATTACK">BRUTE_FORCE_ATTACK (Automated Password Guessing)</option>
+                                                <option value="CREDENTIAL_STUFFING">CREDENTIAL_STUFFING (Breached Credential Replay)</option>
+                                                <option value="UNAUTHORIZED_ACCESS">UNAUTHORIZED_ACCESS (Privilege Abuse / Bypass)</option>
+                                                <option value="SUSPICIOUS_LOGIN_ACTIVITY">SUSPICIOUS_LOGIN_ACTIVITY (Anomalous Geolocation/Hours)</option>
+                                                <option value="OTHER">OTHER (Custom Root Cause)</option>
+                                            </select>
+                                            <input type="text" id="root-cause-explanation" class="form-control mb-2" placeholder="Brief technical rationale...">
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-block" id="btn-submit-root-cause">Update Root Cause</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Incident Resolution Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>🎯 Incident Resolution & Lifecycle</h3>
+                                </div>
+                                <form id="form-resolve-incident" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="resolve-summary-text">Technical Resolution Summary *</label>
+                                        <textarea id="resolve-summary-text" rows="3" class="form-control" placeholder="Summarize defensive countermeasures taken, credential rotations, or IP blocks verified..." required></textarea>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="submit" class="btn btn-success" style="flex:1;" id="btn-resolve-case">Mark Incident RESOLVED</button>
+                                        <button type="button" class="btn btn-secondary" id="btn-close-case">Close Case</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Chronological Forensic Timeline -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>⏳ Forensic Investigation Timeline</h3>
+                                </div>
+                                <div id="investigation-timeline-container" class="timeline p-3">
+                                    <p class="text-muted text-center py-4">Loading timeline...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: INCIDENT MANAGEMENT -->
+                <section id="view-incidents" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Incident Management</h2>
+                            <p class="section-desc">Create, investigate, filter, and resolve security incident records.</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-open-incident-modal">+ Report Incident</button>
+                    </div>
+
+                    <!-- Filter Toolbar -->
+                    <div class="filter-toolbar card">
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="incident-search" placeholder="Search incidents by title or description...">
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filter-severity">Severity:</label>
+                            <select id="filter-severity" class="select-input">
+                                <option value="ALL">All Severities</option>
+                                <option value="CRITICAL">Critical</option>
+                                <option value="HIGH">High</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="LOW">Low</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="filter-status">Status:</label>
+                            <select id="filter-status" class="select-input">
+                                <option value="ALL">All Statuses</option>
+                                <option value="OPEN">Open</option>
+                                <option value="INVESTIGATING">Investigating</option>
+                                <option value="RESOLVED">Resolved</option>
+                                <option value="CLOSED">Closed</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-secondary btn-sm" id="btn-reset-filters">Reset Filters</button>
+                    </div>
+
+                    <!-- Incidents Data Table -->
+                    <div class="card table-card">
+                        <div class="table-responsive">
+                            <table class="data-table" id="incidents-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Severity</th>
+                                        <th>Status</th>
+                                        <th>Reported By</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="incidents-table-body">
+                                    <tr><td colspan="7" class="text-center">Loading incidents...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: THREAT RESPONSE CENTER (Review 3 Phase 6B) -->
+                <section id="view-threat-response" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Threat Response Center</h2>
+                            <p class="section-desc">Active application-level firewall, defensive countermeasures, and mitigation audit telemetry.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-threat-response">🔄 Refresh Defense Telemetry</button>
+                    </div>
+
+                    <!-- Top Split: Manual Blocking & Blocked IPs Table -->
+                    <div class="dashboard-split-grid mb-4">
+                        <!-- Manual IP Block Form -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🛡️ Manual Firewall IP Containment</h3>
+                                <span class="badge badge-accent">Admin Authority</span>
+                            </div>
+                            <form id="form-manual-block" class="p-3">
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-address">Target IPv4 / IPv6 Address *</label>
+                                    <input type="text" id="block-ip-address" class="form-control" placeholder="e.g. 198.51.100.44" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-reason">Security Justification / Reason *</label>
+                                    <input type="text" id="block-ip-reason" class="form-control" placeholder="e.g. Hostile credential spray detected" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-duration">Containment Duration</label>
+                                    <select id="block-ip-duration" class="select-input">
+                                        <option value="15" selected>15 Minutes (Standard Policy)</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="1440">24 Hours</option>
+                                        <option value="0">Permanent Block</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-block" id="btn-submit-ip-block">Enforce IP Block</button>
+                            </form>
+                        </div>
+
+                        <!-- Active Blocked IPs Table -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🚫 Contained / Blocked IP Addresses</h3>
+                                <div class="filter-group-inline">
+                                    <select id="filter-blocked-status" class="select-input select-sm">
+                                        <option value="ALL">All Records</option>
+                                        <option value="ACTIVE" selected>Active Blocks Only</option>
+                                        <option value="EXPIRED">Expired</option>
+                                        <option value="UNBLOCKED">Manually Unblocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="blocked-ips-table">
+                                    <thead>
+                                        <tr>
+                                            <th>IP Address</th>
+                                            <th>Reason</th>
+                                            <th>Blocked At</th>
+                                            <th>Expires In</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blocked-ips-tbody">
+                                        <tr><td colspan="6" class="text-center py-4">Loading blocked IPs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Threat Response History -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>📜 Automated & Manual Defense Execution History</h3>
+                                <p class="text-muted text-sm">Auditable history of containment actions executed by the Intrusion Detection System.</p>
+                            </div>
+                            <div class="filter-group-inline">
+                                <input type="text" id="filter-threat-ip" class="input-sm" placeholder="Filter by Target IP...">
+                                <select id="filter-threat-status" class="select-input select-sm">
+                                    <option value="ALL">All Response Statuses</option>
+                                    <option value="EXECUTED">EXECUTED</option>
+                                    <option value="ALREADY_ACTIVE">ALREADY_ACTIVE</option>
+                                    <option value="SKIPPED_WHITELIST">SKIPPED_WHITELIST</option>
+                                    <option value="FAILED">FAILED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="threat-responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Incident</th>
+                                        <th>Threat Type</th>
+                                        <th>Action Taken</th>
+                                        <th>Target Identifier</th>
+                                        <th>Outcome</th>
+                                        <th>Executed At</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threat-responses-tbody">
+                                    <tr><td colspan="8" class="text-center py-4">Loading threat response history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: INVESTIGATION CENTER (Review 3 Phase 6B) -->
+                <section id="view-investigation" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Investigation & Forensic Triage Center</h2>
+                            <p class="section-desc">Collaborative case dossiers, technical forensic notes, structured JSON telemetry, and incident resolution workflow.</p>
+                        </div>
+                        <div class="filter-group-inline">
+                            <label for="investigation-incident-select" style="font-weight:600; color:var(--text-secondary);">Select Case:</label>
+                            <select id="investigation-incident-select" class="select-input">
+                                <option value="">-- Choose Incident to Investigate --</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-investigation">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Case Dossier Header Card -->
+                    <div id="investigation-case-dossier" class="card p-4 mb-4" style="display:none;">
+                        <div class="dossier-top-bar">
+                            <div>
+                                <span class="badge badge-accent mb-1" id="dossier-id-badge">Incident #--</span>
+                                <h2 id="dossier-title" style="margin:4px 0; color:#f8fafc;">Select an incident</h2>
+                                <p id="dossier-desc" class="text-muted" style="margin-bottom:8px;">Technical details...</p>
+                                <div class="dossier-meta-tags">
+                                    <span id="dossier-severity-badge" class="badge">-- SEVERITY</span>
+                                    <span id="dossier-status-badge" class="badge">STATUS: --</span>
+                                    <span class="badge badge-secondary">Reported By: <strong id="dossier-author">--</strong></span>
+                                    <span class="badge badge-secondary">Created: <span id="dossier-created" class="text-mono">--</span></span>
+                                </div>
+                            </div>
+                            <div class="dossier-kpi-summary">
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Lead Investigator</span>
+                                    <span class="kpi-mini-val" id="dossier-assigned">Unassigned</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Root Cause</span>
+                                    <span class="kpi-mini-val text-amber" id="dossier-root-cause">Undetermined</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Forensic Notes</span>
+                                    <span class="kpi-mini-val text-cyan" id="dossier-total-notes">0</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Defensive Actions</span>
+                                    <span class="kpi-mini-val text-emerald" id="dossier-total-responses">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Summary Notice if resolved -->
+                        <div id="dossier-resolution-box" class="resolution-notice-box mt-3" style="display:none;">
+                            <strong>✅ Technical Resolution Documented:</strong>
+                            <p id="dossier-resolution-text" style="margin:4px 0;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Prompt -->
+                    <div id="investigation-empty-state" class="card text-center p-5">
+                        <div style="font-size:48px; margin-bottom:12px;">🔬</div>
+                        <h3>No Incident Selected for Forensic Triage</h3>
+                        <p class="text-muted">Select an incident from the dropdown above, or click "Investigate" in the Incident Management table.</p>
+                    </div>
+
+                    <!-- Active Investigation Workspace Grid -->
+                    <div id="investigation-workspace" class="dashboard-split-grid" style="display:none;">
+                        <!-- Left Column: Notes & JSON Evidence -->
+                        <div class="investigation-left-col">
+                            <!-- Notes Feed -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>📝 Forensic Notes & Evidence Log</h3>
+                                    <span class="badge badge-secondary" id="notes-count-badge">0 Notes</span>
+                                </div>
+                                <div id="investigation-notes-list" class="notes-feed-container p-3">
+                                    <p class="text-muted text-center py-4">No investigation notes recorded yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>➕ Append Investigation Note & Structured Evidence</h3>
+                                </div>
+                                <form id="form-add-investigation-note" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="inv-note-narrative">Technical Narrative / Observation *</label>
+                                        <textarea id="inv-note-narrative" rows="3" class="form-control" placeholder="Document triage findings, port scan details, or containment steps taken..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <label for="inv-evidence-data" style="margin:0;">Structured JSON Evidence Payload (Optional)</label>
+                                            <div class="evidence-preset-buttons">
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-login">Preset: Login Activity</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-ip">Preset: Source IP</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-alert">Preset: Security Alert</button>
+                                            </div>
+                                        </div>
+                                        <textarea id="inv-evidence-data" rows="4" class="form-control text-mono" placeholder='{"evidenceType": "LOGIN_ACTIVITY", "sourceIp": "198.51.100.50", "attempts": 5}'></textarea>
+                                        <small class="text-muted">Must be valid JSON syntax or empty (maximum payload: 64 KB).</small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn-submit-inv-note">Save Investigation Note</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Case Controls & Chronological Timeline -->
+                        <div class="investigation-right-col">
+                            <!-- Case Ownership & Classification Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>⚖️ Investigator Assignment & Root Cause</h3>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Assignment Form -->
+                                    <form id="form-assign-investigator" class="mb-4">
+                                        <label for="assign-investigator-select" style="font-weight:600;">Assign Lead Investigator (Admin Authority):</label>
+                                        <div style="display:flex; gap:8px; margin-top:6px;">
+                                            <select id="assign-investigator-select" class="select-input" style="flex:1;">
+                                                <option value="">-- Select Investigator --</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm" id="btn-submit-assignment">Assign</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Root Cause Classification Form -->
+                                    <form id="form-root-cause">
+                                        <label for="root-cause-category" style="font-weight:600;">Suspected Root Cause Classification:</label>
+                                        <div style="margin-top:6px;">
+                                            <select id="root-cause-category" class="select-input mb-2" style="width:100%;">
+                                                <option value="BRUTE_FORCE_ATTACK">BRUTE_FORCE_ATTACK (Automated Password Guessing)</option>
+                                                <option value="CREDENTIAL_STUFFING">CREDENTIAL_STUFFING (Breached Credential Replay)</option>
+                                                <option value="UNAUTHORIZED_ACCESS">UNAUTHORIZED_ACCESS (Privilege Abuse / Bypass)</option>
+                                                <option value="SUSPICIOUS_LOGIN_ACTIVITY">SUSPICIOUS_LOGIN_ACTIVITY (Anomalous Geolocation/Hours)</option>
+                                                <option value="OTHER">OTHER (Custom Root Cause)</option>
+                                            </select>
+                                            <input type="text" id="root-cause-explanation" class="form-control mb-2" placeholder="Brief technical rationale...">
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-block" id="btn-submit-root-cause">Update Root Cause</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Incident Resolution Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>🎯 Incident Resolution & Lifecycle</h3>
+                                </div>
+                                <form id="form-resolve-incident" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="resolve-summary-text">Technical Resolution Summary *</label>
+                                        <textarea id="resolve-summary-text" rows="3" class="form-control" placeholder="Summarize defensive countermeasures taken, credential rotations, or IP blocks verified..." required></textarea>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="submit" class="btn btn-success" style="flex:1;" id="btn-resolve-case">Mark Incident RESOLVED</button>
+                                        <button type="button" class="btn btn-secondary" id="btn-close-case">Close Case</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Chronological Forensic Timeline -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>⏳ Forensic Investigation Timeline</h3>
+                                </div>
+                                <div id="investigation-timeline-container" class="timeline p-3">
+                                    <p class="text-muted text-center py-4">Loading timeline...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: THREAT RESPONSE CENTER (Review 3 Phase 6B) -->
+                <section id="view-threat-response" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Threat Response Center</h2>
+                            <p class="section-desc">Active application-level firewall, defensive countermeasures, and mitigation audit telemetry.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-threat-response">🔄 Refresh Defense Telemetry</button>
+                    </div>
+
+                    <!-- Top Split: Manual Blocking & Blocked IPs Table -->
+                    <div class="dashboard-split-grid mb-4">
+                        <!-- Manual IP Block Form -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🛡️ Manual Firewall IP Containment</h3>
+                                <span class="badge badge-accent">Admin Authority</span>
+                            </div>
+                            <form id="form-manual-block" class="p-3">
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-address">Target IPv4 / IPv6 Address *</label>
+                                    <input type="text" id="block-ip-address" class="form-control" placeholder="e.g. 198.51.100.44" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-reason">Security Justification / Reason *</label>
+                                    <input type="text" id="block-ip-reason" class="form-control" placeholder="e.g. Hostile credential spray detected" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-duration">Containment Duration</label>
+                                    <select id="block-ip-duration" class="select-input">
+                                        <option value="15" selected>15 Minutes (Standard Policy)</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="1440">24 Hours</option>
+                                        <option value="0">Permanent Block</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-block" id="btn-submit-ip-block">Enforce IP Block</button>
+                            </form>
+                        </div>
+
+                        <!-- Active Blocked IPs Table -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🚫 Contained / Blocked IP Addresses</h3>
+                                <div class="filter-group-inline">
+                                    <select id="filter-blocked-status" class="select-input select-sm">
+                                        <option value="ALL">All Records</option>
+                                        <option value="ACTIVE" selected>Active Blocks Only</option>
+                                        <option value="EXPIRED">Expired</option>
+                                        <option value="UNBLOCKED">Manually Unblocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="blocked-ips-table">
+                                    <thead>
+                                        <tr>
+                                            <th>IP Address</th>
+                                            <th>Reason</th>
+                                            <th>Blocked At</th>
+                                            <th>Expires In</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blocked-ips-tbody">
+                                        <tr><td colspan="6" class="text-center py-4">Loading blocked IPs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Threat Response History -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>📜 Automated & Manual Defense Execution History</h3>
+                                <p class="text-muted text-sm">Auditable history of containment actions executed by the Intrusion Detection System.</p>
+                            </div>
+                            <div class="filter-group-inline">
+                                <input type="text" id="filter-threat-ip" class="input-sm" placeholder="Filter by Target IP...">
+                                <select id="filter-threat-status" class="select-input select-sm">
+                                    <option value="ALL">All Response Statuses</option>
+                                    <option value="EXECUTED">EXECUTED</option>
+                                    <option value="ALREADY_ACTIVE">ALREADY_ACTIVE</option>
+                                    <option value="SKIPPED_WHITELIST">SKIPPED_WHITELIST</option>
+                                    <option value="FAILED">FAILED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="threat-responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Incident</th>
+                                        <th>Threat Type</th>
+                                        <th>Action Taken</th>
+                                        <th>Target Identifier</th>
+                                        <th>Outcome</th>
+                                        <th>Executed At</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threat-responses-tbody">
+                                    <tr><td colspan="8" class="text-center py-4">Loading threat response history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: INVESTIGATION CENTER (Review 3 Phase 6B) -->
+                <section id="view-investigation" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Investigation & Forensic Triage Center</h2>
+                            <p class="section-desc">Collaborative case dossiers, technical forensic notes, structured JSON telemetry, and incident resolution workflow.</p>
+                        </div>
+                        <div class="filter-group-inline">
+                            <label for="investigation-incident-select" style="font-weight:600; color:var(--text-secondary);">Select Case:</label>
+                            <select id="investigation-incident-select" class="select-input">
+                                <option value="">-- Choose Incident to Investigate --</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-investigation">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Case Dossier Header Card -->
+                    <div id="investigation-case-dossier" class="card p-4 mb-4" style="display:none;">
+                        <div class="dossier-top-bar">
+                            <div>
+                                <span class="badge badge-accent mb-1" id="dossier-id-badge">Incident #--</span>
+                                <h2 id="dossier-title" style="margin:4px 0; color:#f8fafc;">Select an incident</h2>
+                                <p id="dossier-desc" class="text-muted" style="margin-bottom:8px;">Technical details...</p>
+                                <div class="dossier-meta-tags">
+                                    <span id="dossier-severity-badge" class="badge">-- SEVERITY</span>
+                                    <span id="dossier-status-badge" class="badge">STATUS: --</span>
+                                    <span class="badge badge-secondary">Reported By: <strong id="dossier-author">--</strong></span>
+                                    <span class="badge badge-secondary">Created: <span id="dossier-created" class="text-mono">--</span></span>
+                                </div>
+                            </div>
+                            <div class="dossier-kpi-summary">
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Lead Investigator</span>
+                                    <span class="kpi-mini-val" id="dossier-assigned">Unassigned</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Root Cause</span>
+                                    <span class="kpi-mini-val text-amber" id="dossier-root-cause">Undetermined</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Forensic Notes</span>
+                                    <span class="kpi-mini-val text-cyan" id="dossier-total-notes">0</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Defensive Actions</span>
+                                    <span class="kpi-mini-val text-emerald" id="dossier-total-responses">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Summary Notice if resolved -->
+                        <div id="dossier-resolution-box" class="resolution-notice-box mt-3" style="display:none;">
+                            <strong>✅ Technical Resolution Documented:</strong>
+                            <p id="dossier-resolution-text" style="margin:4px 0;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Prompt -->
+                    <div id="investigation-empty-state" class="card text-center p-5">
+                        <div style="font-size:48px; margin-bottom:12px;">🔬</div>
+                        <h3>No Incident Selected for Forensic Triage</h3>
+                        <p class="text-muted">Select an incident from the dropdown above, or click "Investigate" in the Incident Management table.</p>
+                    </div>
+
+                    <!-- Active Investigation Workspace Grid -->
+                    <div id="investigation-workspace" class="dashboard-split-grid" style="display:none;">
+                        <!-- Left Column: Notes & JSON Evidence -->
+                        <div class="investigation-left-col">
+                            <!-- Notes Feed -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>📝 Forensic Notes & Evidence Log</h3>
+                                    <span class="badge badge-secondary" id="notes-count-badge">0 Notes</span>
+                                </div>
+                                <div id="investigation-notes-list" class="notes-feed-container p-3">
+                                    <p class="text-muted text-center py-4">No investigation notes recorded yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>➕ Append Investigation Note & Structured Evidence</h3>
+                                </div>
+                                <form id="form-add-investigation-note" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="inv-note-narrative">Technical Narrative / Observation *</label>
+                                        <textarea id="inv-note-narrative" rows="3" class="form-control" placeholder="Document triage findings, port scan details, or containment steps taken..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <label for="inv-evidence-data" style="margin:0;">Structured JSON Evidence Payload (Optional)</label>
+                                            <div class="evidence-preset-buttons">
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-login">Preset: Login Activity</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-ip">Preset: Source IP</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-alert">Preset: Security Alert</button>
+                                            </div>
+                                        </div>
+                                        <textarea id="inv-evidence-data" rows="4" class="form-control text-mono" placeholder='{"evidenceType": "LOGIN_ACTIVITY", "sourceIp": "198.51.100.50", "attempts": 5}'></textarea>
+                                        <small class="text-muted">Must be valid JSON syntax or empty (maximum payload: 64 KB).</small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn-submit-inv-note">Save Investigation Note</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Case Controls & Chronological Timeline -->
+                        <div class="investigation-right-col">
+                            <!-- Case Ownership & Classification Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>⚖️ Investigator Assignment & Root Cause</h3>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Assignment Form -->
+                                    <form id="form-assign-investigator" class="mb-4">
+                                        <label for="assign-investigator-select" style="font-weight:600;">Assign Lead Investigator (Admin Authority):</label>
+                                        <div style="display:flex; gap:8px; margin-top:6px;">
+                                            <select id="assign-investigator-select" class="select-input" style="flex:1;">
+                                                <option value="">-- Select Investigator --</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm" id="btn-submit-assignment">Assign</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Root Cause Classification Form -->
+                                    <form id="form-root-cause">
+                                        <label for="root-cause-category" style="font-weight:600;">Suspected Root Cause Classification:</label>
+                                        <div style="margin-top:6px;">
+                                            <select id="root-cause-category" class="select-input mb-2" style="width:100%;">
+                                                <option value="BRUTE_FORCE_ATTACK">BRUTE_FORCE_ATTACK (Automated Password Guessing)</option>
+                                                <option value="CREDENTIAL_STUFFING">CREDENTIAL_STUFFING (Breached Credential Replay)</option>
+                                                <option value="UNAUTHORIZED_ACCESS">UNAUTHORIZED_ACCESS (Privilege Abuse / Bypass)</option>
+                                                <option value="SUSPICIOUS_LOGIN_ACTIVITY">SUSPICIOUS_LOGIN_ACTIVITY (Anomalous Geolocation/Hours)</option>
+                                                <option value="OTHER">OTHER (Custom Root Cause)</option>
+                                            </select>
+                                            <input type="text" id="root-cause-explanation" class="form-control mb-2" placeholder="Brief technical rationale...">
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-block" id="btn-submit-root-cause">Update Root Cause</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Incident Resolution Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>🎯 Incident Resolution & Lifecycle</h3>
+                                </div>
+                                <form id="form-resolve-incident" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="resolve-summary-text">Technical Resolution Summary *</label>
+                                        <textarea id="resolve-summary-text" rows="3" class="form-control" placeholder="Summarize defensive countermeasures taken, credential rotations, or IP blocks verified..." required></textarea>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="submit" class="btn btn-success" style="flex:1;" id="btn-resolve-case">Mark Incident RESOLVED</button>
+                                        <button type="button" class="btn btn-secondary" id="btn-close-case">Close Case</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Chronological Forensic Timeline -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>⏳ Forensic Investigation Timeline</h3>
+                                </div>
+                                <div id="investigation-timeline-container" class="timeline p-3">
+                                    <p class="text-muted text-center py-4">Loading timeline...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 5: UNAUTHORIZED ACCESS MONITORING -->
+                <section id="view-access" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Unauthorized Access Monitoring</h2>
+                            <p class="section-desc">Tracks authentication failures, intrusion probes, and simulated threat attempts.</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="btn btn-warning" id="btn-simulate-threat">⚡ Simulate Single Probe</button>
+                            <button class="btn btn-danger" id="btn-simulate-brute-force">🚨 Simulate Brute-Force Attack (5 Failures)</button>
+                        </div>
+                    </div>
+
+                    <div class="card table-card">
+                        <div class="table-responsive">
+                            <table class="data-table" id="access-events-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Attempted Username</th>
+                                        <th>Source / IP</th>
+                                        <th>Event Type</th>
+                                        <th>Outcome / Result</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="access-events-body">
+                                    <tr><td colspan="6" class="text-center">Loading access events...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: THREAT RESPONSE CENTER (Review 3 Phase 6B) -->
+                <section id="view-threat-response" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Threat Response Center</h2>
+                            <p class="section-desc">Active application-level firewall, defensive countermeasures, and mitigation audit telemetry.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-threat-response">🔄 Refresh Defense Telemetry</button>
+                    </div>
+
+                    <!-- Top Split: Manual Blocking & Blocked IPs Table -->
+                    <div class="dashboard-split-grid mb-4">
+                        <!-- Manual IP Block Form -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🛡️ Manual Firewall IP Containment</h3>
+                                <span class="badge badge-accent">Admin Authority</span>
+                            </div>
+                            <form id="form-manual-block" class="p-3">
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-address">Target IPv4 / IPv6 Address *</label>
+                                    <input type="text" id="block-ip-address" class="form-control" placeholder="e.g. 198.51.100.44" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-reason">Security Justification / Reason *</label>
+                                    <input type="text" id="block-ip-reason" class="form-control" placeholder="e.g. Hostile credential spray detected" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-duration">Containment Duration</label>
+                                    <select id="block-ip-duration" class="select-input">
+                                        <option value="15" selected>15 Minutes (Standard Policy)</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="1440">24 Hours</option>
+                                        <option value="0">Permanent Block</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-block" id="btn-submit-ip-block">Enforce IP Block</button>
+                            </form>
+                        </div>
+
+                        <!-- Active Blocked IPs Table -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🚫 Contained / Blocked IP Addresses</h3>
+                                <div class="filter-group-inline">
+                                    <select id="filter-blocked-status" class="select-input select-sm">
+                                        <option value="ALL">All Records</option>
+                                        <option value="ACTIVE" selected>Active Blocks Only</option>
+                                        <option value="EXPIRED">Expired</option>
+                                        <option value="UNBLOCKED">Manually Unblocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="blocked-ips-table">
+                                    <thead>
+                                        <tr>
+                                            <th>IP Address</th>
+                                            <th>Reason</th>
+                                            <th>Blocked At</th>
+                                            <th>Expires In</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blocked-ips-tbody">
+                                        <tr><td colspan="6" class="text-center py-4">Loading blocked IPs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Threat Response History -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>📜 Automated & Manual Defense Execution History</h3>
+                                <p class="text-muted text-sm">Auditable history of containment actions executed by the Intrusion Detection System.</p>
+                            </div>
+                            <div class="filter-group-inline">
+                                <input type="text" id="filter-threat-ip" class="input-sm" placeholder="Filter by Target IP...">
+                                <select id="filter-threat-status" class="select-input select-sm">
+                                    <option value="ALL">All Response Statuses</option>
+                                    <option value="EXECUTED">EXECUTED</option>
+                                    <option value="ALREADY_ACTIVE">ALREADY_ACTIVE</option>
+                                    <option value="SKIPPED_WHITELIST">SKIPPED_WHITELIST</option>
+                                    <option value="FAILED">FAILED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="threat-responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Incident</th>
+                                        <th>Threat Type</th>
+                                        <th>Action Taken</th>
+                                        <th>Target Identifier</th>
+                                        <th>Outcome</th>
+                                        <th>Executed At</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threat-responses-tbody">
+                                    <tr><td colspan="8" class="text-center py-4">Loading threat response history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: INVESTIGATION CENTER (Review 3 Phase 6B) -->
+                <section id="view-investigation" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Investigation & Forensic Triage Center</h2>
+                            <p class="section-desc">Collaborative case dossiers, technical forensic notes, structured JSON telemetry, and incident resolution workflow.</p>
+                        </div>
+                        <div class="filter-group-inline">
+                            <label for="investigation-incident-select" style="font-weight:600; color:var(--text-secondary);">Select Case:</label>
+                            <select id="investigation-incident-select" class="select-input">
+                                <option value="">-- Choose Incident to Investigate --</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-investigation">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Case Dossier Header Card -->
+                    <div id="investigation-case-dossier" class="card p-4 mb-4" style="display:none;">
+                        <div class="dossier-top-bar">
+                            <div>
+                                <span class="badge badge-accent mb-1" id="dossier-id-badge">Incident #--</span>
+                                <h2 id="dossier-title" style="margin:4px 0; color:#f8fafc;">Select an incident</h2>
+                                <p id="dossier-desc" class="text-muted" style="margin-bottom:8px;">Technical details...</p>
+                                <div class="dossier-meta-tags">
+                                    <span id="dossier-severity-badge" class="badge">-- SEVERITY</span>
+                                    <span id="dossier-status-badge" class="badge">STATUS: --</span>
+                                    <span class="badge badge-secondary">Reported By: <strong id="dossier-author">--</strong></span>
+                                    <span class="badge badge-secondary">Created: <span id="dossier-created" class="text-mono">--</span></span>
+                                </div>
+                            </div>
+                            <div class="dossier-kpi-summary">
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Lead Investigator</span>
+                                    <span class="kpi-mini-val" id="dossier-assigned">Unassigned</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Root Cause</span>
+                                    <span class="kpi-mini-val text-amber" id="dossier-root-cause">Undetermined</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Forensic Notes</span>
+                                    <span class="kpi-mini-val text-cyan" id="dossier-total-notes">0</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Defensive Actions</span>
+                                    <span class="kpi-mini-val text-emerald" id="dossier-total-responses">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Summary Notice if resolved -->
+                        <div id="dossier-resolution-box" class="resolution-notice-box mt-3" style="display:none;">
+                            <strong>✅ Technical Resolution Documented:</strong>
+                            <p id="dossier-resolution-text" style="margin:4px 0;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Prompt -->
+                    <div id="investigation-empty-state" class="card text-center p-5">
+                        <div style="font-size:48px; margin-bottom:12px;">🔬</div>
+                        <h3>No Incident Selected for Forensic Triage</h3>
+                        <p class="text-muted">Select an incident from the dropdown above, or click "Investigate" in the Incident Management table.</p>
+                    </div>
+
+                    <!-- Active Investigation Workspace Grid -->
+                    <div id="investigation-workspace" class="dashboard-split-grid" style="display:none;">
+                        <!-- Left Column: Notes & JSON Evidence -->
+                        <div class="investigation-left-col">
+                            <!-- Notes Feed -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>📝 Forensic Notes & Evidence Log</h3>
+                                    <span class="badge badge-secondary" id="notes-count-badge">0 Notes</span>
+                                </div>
+                                <div id="investigation-notes-list" class="notes-feed-container p-3">
+                                    <p class="text-muted text-center py-4">No investigation notes recorded yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>➕ Append Investigation Note & Structured Evidence</h3>
+                                </div>
+                                <form id="form-add-investigation-note" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="inv-note-narrative">Technical Narrative / Observation *</label>
+                                        <textarea id="inv-note-narrative" rows="3" class="form-control" placeholder="Document triage findings, port scan details, or containment steps taken..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <label for="inv-evidence-data" style="margin:0;">Structured JSON Evidence Payload (Optional)</label>
+                                            <div class="evidence-preset-buttons">
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-login">Preset: Login Activity</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-ip">Preset: Source IP</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-alert">Preset: Security Alert</button>
+                                            </div>
+                                        </div>
+                                        <textarea id="inv-evidence-data" rows="4" class="form-control text-mono" placeholder='{"evidenceType": "LOGIN_ACTIVITY", "sourceIp": "198.51.100.50", "attempts": 5}'></textarea>
+                                        <small class="text-muted">Must be valid JSON syntax or empty (maximum payload: 64 KB).</small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn-submit-inv-note">Save Investigation Note</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Case Controls & Chronological Timeline -->
+                        <div class="investigation-right-col">
+                            <!-- Case Ownership & Classification Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>⚖️ Investigator Assignment & Root Cause</h3>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Assignment Form -->
+                                    <form id="form-assign-investigator" class="mb-4">
+                                        <label for="assign-investigator-select" style="font-weight:600;">Assign Lead Investigator (Admin Authority):</label>
+                                        <div style="display:flex; gap:8px; margin-top:6px;">
+                                            <select id="assign-investigator-select" class="select-input" style="flex:1;">
+                                                <option value="">-- Select Investigator --</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm" id="btn-submit-assignment">Assign</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Root Cause Classification Form -->
+                                    <form id="form-root-cause">
+                                        <label for="root-cause-category" style="font-weight:600;">Suspected Root Cause Classification:</label>
+                                        <div style="margin-top:6px;">
+                                            <select id="root-cause-category" class="select-input mb-2" style="width:100%;">
+                                                <option value="BRUTE_FORCE_ATTACK">BRUTE_FORCE_ATTACK (Automated Password Guessing)</option>
+                                                <option value="CREDENTIAL_STUFFING">CREDENTIAL_STUFFING (Breached Credential Replay)</option>
+                                                <option value="UNAUTHORIZED_ACCESS">UNAUTHORIZED_ACCESS (Privilege Abuse / Bypass)</option>
+                                                <option value="SUSPICIOUS_LOGIN_ACTIVITY">SUSPICIOUS_LOGIN_ACTIVITY (Anomalous Geolocation/Hours)</option>
+                                                <option value="OTHER">OTHER (Custom Root Cause)</option>
+                                            </select>
+                                            <input type="text" id="root-cause-explanation" class="form-control mb-2" placeholder="Brief technical rationale...">
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-block" id="btn-submit-root-cause">Update Root Cause</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Incident Resolution Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>🎯 Incident Resolution & Lifecycle</h3>
+                                </div>
+                                <form id="form-resolve-incident" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="resolve-summary-text">Technical Resolution Summary *</label>
+                                        <textarea id="resolve-summary-text" rows="3" class="form-control" placeholder="Summarize defensive countermeasures taken, credential rotations, or IP blocks verified..." required></textarea>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="submit" class="btn btn-success" style="flex:1;" id="btn-resolve-case">Mark Incident RESOLVED</button>
+                                        <button type="button" class="btn btn-secondary" id="btn-close-case">Close Case</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Chronological Forensic Timeline -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>⏳ Forensic Investigation Timeline</h3>
+                                </div>
+                                <div id="investigation-timeline-container" class="timeline p-3">
+                                    <p class="text-muted text-center py-4">Loading timeline...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: ACTIVITY HISTORY -->
+                <section id="view-activity" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>System Activity Audit Log</h2>
+                            <p class="section-desc">Immutable audit record of user logins, incident operations, and administrative actions.</p>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" id="btn-refresh-activity">🔄 Refresh Log</button>
+                    </div>
+
+                    <div class="card table-card">
+                        <div class="table-responsive">
+                            <table class="data-table" id="activity-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activity-table-body">
+                                    <tr><td colspan="5" class="text-center">Loading activity log...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: THREAT RESPONSE CENTER (Review 3 Phase 6B) -->
+                <section id="view-threat-response" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Threat Response Center</h2>
+                            <p class="section-desc">Active application-level firewall, defensive countermeasures, and mitigation audit telemetry.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-threat-response">🔄 Refresh Defense Telemetry</button>
+                    </div>
+
+                    <!-- Top Split: Manual Blocking & Blocked IPs Table -->
+                    <div class="dashboard-split-grid mb-4">
+                        <!-- Manual IP Block Form -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🛡️ Manual Firewall IP Containment</h3>
+                                <span class="badge badge-accent">Admin Authority</span>
+                            </div>
+                            <form id="form-manual-block" class="p-3">
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-address">Target IPv4 / IPv6 Address *</label>
+                                    <input type="text" id="block-ip-address" class="form-control" placeholder="e.g. 198.51.100.44" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-reason">Security Justification / Reason *</label>
+                                    <input type="text" id="block-ip-reason" class="form-control" placeholder="e.g. Hostile credential spray detected" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-duration">Containment Duration</label>
+                                    <select id="block-ip-duration" class="select-input">
+                                        <option value="15" selected>15 Minutes (Standard Policy)</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="1440">24 Hours</option>
+                                        <option value="0">Permanent Block</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-block" id="btn-submit-ip-block">Enforce IP Block</button>
+                            </form>
+                        </div>
+
+                        <!-- Active Blocked IPs Table -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🚫 Contained / Blocked IP Addresses</h3>
+                                <div class="filter-group-inline">
+                                    <select id="filter-blocked-status" class="select-input select-sm">
+                                        <option value="ALL">All Records</option>
+                                        <option value="ACTIVE" selected>Active Blocks Only</option>
+                                        <option value="EXPIRED">Expired</option>
+                                        <option value="UNBLOCKED">Manually Unblocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="blocked-ips-table">
+                                    <thead>
+                                        <tr>
+                                            <th>IP Address</th>
+                                            <th>Reason</th>
+                                            <th>Blocked At</th>
+                                            <th>Expires In</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blocked-ips-tbody">
+                                        <tr><td colspan="6" class="text-center py-4">Loading blocked IPs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Threat Response History -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>📜 Automated & Manual Defense Execution History</h3>
+                                <p class="text-muted text-sm">Auditable history of containment actions executed by the Intrusion Detection System.</p>
+                            </div>
+                            <div class="filter-group-inline">
+                                <input type="text" id="filter-threat-ip" class="input-sm" placeholder="Filter by Target IP...">
+                                <select id="filter-threat-status" class="select-input select-sm">
+                                    <option value="ALL">All Response Statuses</option>
+                                    <option value="EXECUTED">EXECUTED</option>
+                                    <option value="ALREADY_ACTIVE">ALREADY_ACTIVE</option>
+                                    <option value="SKIPPED_WHITELIST">SKIPPED_WHITELIST</option>
+                                    <option value="FAILED">FAILED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="threat-responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Incident</th>
+                                        <th>Threat Type</th>
+                                        <th>Action Taken</th>
+                                        <th>Target Identifier</th>
+                                        <th>Outcome</th>
+                                        <th>Executed At</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threat-responses-tbody">
+                                    <tr><td colspan="8" class="text-center py-4">Loading threat response history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: INVESTIGATION CENTER (Review 3 Phase 6B) -->
+                <section id="view-investigation" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Investigation & Forensic Triage Center</h2>
+                            <p class="section-desc">Collaborative case dossiers, technical forensic notes, structured JSON telemetry, and incident resolution workflow.</p>
+                        </div>
+                        <div class="filter-group-inline">
+                            <label for="investigation-incident-select" style="font-weight:600; color:var(--text-secondary);">Select Case:</label>
+                            <select id="investigation-incident-select" class="select-input">
+                                <option value="">-- Choose Incident to Investigate --</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-investigation">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Case Dossier Header Card -->
+                    <div id="investigation-case-dossier" class="card p-4 mb-4" style="display:none;">
+                        <div class="dossier-top-bar">
+                            <div>
+                                <span class="badge badge-accent mb-1" id="dossier-id-badge">Incident #--</span>
+                                <h2 id="dossier-title" style="margin:4px 0; color:#f8fafc;">Select an incident</h2>
+                                <p id="dossier-desc" class="text-muted" style="margin-bottom:8px;">Technical details...</p>
+                                <div class="dossier-meta-tags">
+                                    <span id="dossier-severity-badge" class="badge">-- SEVERITY</span>
+                                    <span id="dossier-status-badge" class="badge">STATUS: --</span>
+                                    <span class="badge badge-secondary">Reported By: <strong id="dossier-author">--</strong></span>
+                                    <span class="badge badge-secondary">Created: <span id="dossier-created" class="text-mono">--</span></span>
+                                </div>
+                            </div>
+                            <div class="dossier-kpi-summary">
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Lead Investigator</span>
+                                    <span class="kpi-mini-val" id="dossier-assigned">Unassigned</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Root Cause</span>
+                                    <span class="kpi-mini-val text-amber" id="dossier-root-cause">Undetermined</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Forensic Notes</span>
+                                    <span class="kpi-mini-val text-cyan" id="dossier-total-notes">0</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Defensive Actions</span>
+                                    <span class="kpi-mini-val text-emerald" id="dossier-total-responses">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Summary Notice if resolved -->
+                        <div id="dossier-resolution-box" class="resolution-notice-box mt-3" style="display:none;">
+                            <strong>✅ Technical Resolution Documented:</strong>
+                            <p id="dossier-resolution-text" style="margin:4px 0;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Prompt -->
+                    <div id="investigation-empty-state" class="card text-center p-5">
+                        <div style="font-size:48px; margin-bottom:12px;">🔬</div>
+                        <h3>No Incident Selected for Forensic Triage</h3>
+                        <p class="text-muted">Select an incident from the dropdown above, or click "Investigate" in the Incident Management table.</p>
+                    </div>
+
+                    <!-- Active Investigation Workspace Grid -->
+                    <div id="investigation-workspace" class="dashboard-split-grid" style="display:none;">
+                        <!-- Left Column: Notes & JSON Evidence -->
+                        <div class="investigation-left-col">
+                            <!-- Notes Feed -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>📝 Forensic Notes & Evidence Log</h3>
+                                    <span class="badge badge-secondary" id="notes-count-badge">0 Notes</span>
+                                </div>
+                                <div id="investigation-notes-list" class="notes-feed-container p-3">
+                                    <p class="text-muted text-center py-4">No investigation notes recorded yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>➕ Append Investigation Note & Structured Evidence</h3>
+                                </div>
+                                <form id="form-add-investigation-note" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="inv-note-narrative">Technical Narrative / Observation *</label>
+                                        <textarea id="inv-note-narrative" rows="3" class="form-control" placeholder="Document triage findings, port scan details, or containment steps taken..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <label for="inv-evidence-data" style="margin:0;">Structured JSON Evidence Payload (Optional)</label>
+                                            <div class="evidence-preset-buttons">
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-login">Preset: Login Activity</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-ip">Preset: Source IP</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-alert">Preset: Security Alert</button>
+                                            </div>
+                                        </div>
+                                        <textarea id="inv-evidence-data" rows="4" class="form-control text-mono" placeholder='{"evidenceType": "LOGIN_ACTIVITY", "sourceIp": "198.51.100.50", "attempts": 5}'></textarea>
+                                        <small class="text-muted">Must be valid JSON syntax or empty (maximum payload: 64 KB).</small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn-submit-inv-note">Save Investigation Note</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Case Controls & Chronological Timeline -->
+                        <div class="investigation-right-col">
+                            <!-- Case Ownership & Classification Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>⚖️ Investigator Assignment & Root Cause</h3>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Assignment Form -->
+                                    <form id="form-assign-investigator" class="mb-4">
+                                        <label for="assign-investigator-select" style="font-weight:600;">Assign Lead Investigator (Admin Authority):</label>
+                                        <div style="display:flex; gap:8px; margin-top:6px;">
+                                            <select id="assign-investigator-select" class="select-input" style="flex:1;">
+                                                <option value="">-- Select Investigator --</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm" id="btn-submit-assignment">Assign</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Root Cause Classification Form -->
+                                    <form id="form-root-cause">
+                                        <label for="root-cause-category" style="font-weight:600;">Suspected Root Cause Classification:</label>
+                                        <div style="margin-top:6px;">
+                                            <select id="root-cause-category" class="select-input mb-2" style="width:100%;">
+                                                <option value="BRUTE_FORCE_ATTACK">BRUTE_FORCE_ATTACK (Automated Password Guessing)</option>
+                                                <option value="CREDENTIAL_STUFFING">CREDENTIAL_STUFFING (Breached Credential Replay)</option>
+                                                <option value="UNAUTHORIZED_ACCESS">UNAUTHORIZED_ACCESS (Privilege Abuse / Bypass)</option>
+                                                <option value="SUSPICIOUS_LOGIN_ACTIVITY">SUSPICIOUS_LOGIN_ACTIVITY (Anomalous Geolocation/Hours)</option>
+                                                <option value="OTHER">OTHER (Custom Root Cause)</option>
+                                            </select>
+                                            <input type="text" id="root-cause-explanation" class="form-control mb-2" placeholder="Brief technical rationale...">
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-block" id="btn-submit-root-cause">Update Root Cause</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Incident Resolution Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>🎯 Incident Resolution & Lifecycle</h3>
+                                </div>
+                                <form id="form-resolve-incident" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="resolve-summary-text">Technical Resolution Summary *</label>
+                                        <textarea id="resolve-summary-text" rows="3" class="form-control" placeholder="Summarize defensive countermeasures taken, credential rotations, or IP blocks verified..." required></textarea>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="submit" class="btn btn-success" style="flex:1;" id="btn-resolve-case">Mark Incident RESOLVED</button>
+                                        <button type="button" class="btn btn-secondary" id="btn-close-case">Close Case</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Chronological Forensic Timeline -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>⏳ Forensic Investigation Timeline</h3>
+                                </div>
+                                <div id="investigation-timeline-container" class="timeline p-3">
+                                    <p class="text-muted text-center py-4">Loading timeline...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 6: ACCOUNT SECURITY & CREDENTIAL PROTECTION (Review 3 Phase 6B) -->
+                <section id="view-account-security" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Account Security & Credential Protection</h2>
+                            <p class="section-desc">Monitors failed authentication attempts, enforces automatic 15-minute account lockouts, and provides administrative unlock controls.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-accounts">🔄 Refresh Account States</button>
+                    </div>
+
+                    <!-- Policy Info & Statistics Grid -->
+                    <div class="metrics-grid mb-4">
+                        <div class="metric-card">
+                            <div class="metric-icon icon-blue">👥</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Monitored Accounts</span>
+                                <h3 class="metric-value" id="stat-acc-total">--</h3>
+                                <span class="metric-hint">Database users</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-red">🔒</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Currently Locked</span>
+                                <h3 class="metric-value" id="stat-acc-locked">0</h3>
+                                <span class="metric-hint">Threshold exceeded</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-amber">🛡️</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Lockout Policy</span>
+                                <h3 class="metric-value" style="font-size:20px;">5 Attempts</h3>
+                                <span class="metric-hint">Consecutive failures</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon icon-emerald">⏱️</div>
+                            <div class="metric-body">
+                                <span class="metric-label">Lockout Duration</span>
+                                <h3 class="metric-value" style="font-size:20px;">15 Minutes</h3>
+                                <span class="metric-hint">Auto-expiration window</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accounts Lockout Table -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>👤 User Accounts Credential Security State</h3>
+                                <p class="text-muted text-sm">Real-time lockout status, failed attempt counts, and administrative unlock overrides.</p>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="account-security-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Account Status</th>
+                                        <th>Consecutive Failed Attempts</th>
+                                        <th>Lock Expiration</th>
+                                        <th>Remaining Duration</th>
+                                        <th>Administrative Override</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="account-security-tbody">
+                                    <tr><td colspan="6" class="text-center py-4">Loading account security status...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 7: SWING COMPONENT LAB INFO -->
+                <section id="view-lab" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Java Swing Component Lab</h2>
+                            <p class="section-desc">Overview of the comprehensive desktop GUI review suite built for faculty evaluation.</p>
+                        </div>
+                    </div>
+
+                    <div class="card lab-info-card">
+                        <div class="lab-badge">College Viva Showcase Feature</div>
+                        <h3>Interactive Desktop Component Lab</h3>
+                        <p>The companion Java Swing desktop interface contains a dedicated <strong>Swing Component Lab</strong> tab specifically created for the second-year B.Tech CSE evaluation.</p>
+                        
+                        <div class="component-grid">
+                            <div class="component-box">
+                                <h4>🗂️ Containers & Windows</h4>
+                                <ul>
+                                    <li><code>JFrame</code> (Top-level application window)</li>
+                                    <li><code>JDialog</code> (Modal incident editor & dialogs)</li>
+                                    <li><code>JInternalFrame</code> &amp; <code>JDesktopPane</code> (MDI interface)</li>
+                                    <li><code>JSplitPane</code>, <code>JTabbedPane</code>, <code>JScrollPane</code></li>
+                                    <li><code>JLayeredPane</code> &amp; <code>JPanel</code></li>
+                                </ul>
+                            </div>
+
+                            <div class="component-box">
+                                <h4>📝 Text & Input</h4>
+                                <ul>
+                                    <li><code>JTextField</code>, <code>JPasswordField</code></li>
+                                    <li><code>JTextArea</code> (Multi-line description editor)</li>
+                                    <li><code>JTextPane</code> (Formatted rich text)</li>
+                                    <li><code>JEditorPane</code> (HTML rendering)</li>
+                                    <li><code>JFormattedTextField</code> (Regex/Date formatting)</li>
+                                </ul>
+                            </div>
+
+                            <div class="component-box">
+                                <h4>🔘 Buttons & Selection</h4>
+                                <ul>
+                                    <li><code>JButton</code> (Themed action buttons)</li>
+                                    <li><code>JToggleButton</code> (State toggles)</li>
+                                    <li><code>JCheckBox</code> &amp; <code>JRadioButton</code></li>
+                                    <li><code>ButtonGroup</code> (Exclusive radio selection)</li>
+                                    <li><code>JComboBox</code> &amp; <code>JSpinner</code></li>
+                                </ul>
+                            </div>
+
+                            <div class="component-box">
+                                <h4>📊 Tables, Trees & Menus</h4>
+                                <ul>
+                                    <li><code>JTable</code> (Live database data display)</li>
+                                    <li><code>JTree</code> (Hierarchical asset taxonomy)</li>
+                                    <li><code>JMenuBar</code>, <code>JMenu</code>, <code>JMenuItem</code></li>
+                                    <li><code>JPopupMenu</code> (Context right-click menus)</li>
+                                    <li><code>JToolBar</code> (Quick access actions)</li>
+                                </ul>
+                            </div>
+
+                            <div class="component-box">
+                                <h4>📈 Feedback & Dialogs</h4>
+                                <ul>
+                                    <li><code>JProgressBar</code> (Live security score gauge)</li>
+                                    <li><code>JSlider</code> (Alert sensitivity control)</li>
+                                    <li><code>JOptionPane</code> (Alerts and confirmations)</li>
+                                    <li><code>JFileChooser</code> &amp; <code>JColorChooser</code></li>
+                                    <li><code>JSeparator</code> &amp; Tooltips</li>
+                                </ul>
+                            </div>
+
+                            <div class="component-box">
+                                <h4>📐 Layout Managers</h4>
+                                <ul>
+                                    <li><code>BorderLayout</code> (North, South, Center anatomy)</li>
+                                    <li><code>FlowLayout</code> (Linear button panels)</li>
+                                    <li><code>GridLayout</code> (Uniform metric cards)</li>
+                                    <li><code>GridBagLayout</code> (Precision form alignments)</li>
+                                    <li><code>BoxLayout</code> &amp; <code>CardLayout</code></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="lab-launch-hint">
+                            <p>💡 <em>To launch the Java Swing Desktop Application, run <code>run.bat</code> and select Option 2, or execute <code>mvn exec:java</code>.</em></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: THREAT RESPONSE CENTER (Review 3 Phase 6B) -->
+                <section id="view-threat-response" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Threat Response Center</h2>
+                            <p class="section-desc">Active application-level firewall, defensive countermeasures, and mitigation audit telemetry.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-threat-response">🔄 Refresh Defense Telemetry</button>
+                    </div>
+
+                    <!-- Top Split: Manual Blocking & Blocked IPs Table -->
+                    <div class="dashboard-split-grid mb-4">
+                        <!-- Manual IP Block Form -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🛡️ Manual Firewall IP Containment</h3>
+                                <span class="badge badge-accent">Admin Authority</span>
+                            </div>
+                            <form id="form-manual-block" class="p-3">
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-address">Target IPv4 / IPv6 Address *</label>
+                                    <input type="text" id="block-ip-address" class="form-control" placeholder="e.g. 198.51.100.44" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-reason">Security Justification / Reason *</label>
+                                    <input type="text" id="block-ip-reason" class="form-control" placeholder="e.g. Hostile credential spray detected" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-duration">Containment Duration</label>
+                                    <select id="block-ip-duration" class="select-input">
+                                        <option value="15" selected>15 Minutes (Standard Policy)</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="1440">24 Hours</option>
+                                        <option value="0">Permanent Block</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-block" id="btn-submit-ip-block">Enforce IP Block</button>
+                            </form>
+                        </div>
+
+                        <!-- Active Blocked IPs Table -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🚫 Contained / Blocked IP Addresses</h3>
+                                <div class="filter-group-inline">
+                                    <select id="filter-blocked-status" class="select-input select-sm">
+                                        <option value="ALL">All Records</option>
+                                        <option value="ACTIVE" selected>Active Blocks Only</option>
+                                        <option value="EXPIRED">Expired</option>
+                                        <option value="UNBLOCKED">Manually Unblocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="blocked-ips-table">
+                                    <thead>
+                                        <tr>
+                                            <th>IP Address</th>
+                                            <th>Reason</th>
+                                            <th>Blocked At</th>
+                                            <th>Expires In</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blocked-ips-tbody">
+                                        <tr><td colspan="6" class="text-center py-4">Loading blocked IPs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Threat Response History -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>📜 Automated & Manual Defense Execution History</h3>
+                                <p class="text-muted text-sm">Auditable history of containment actions executed by the Intrusion Detection System.</p>
+                            </div>
+                            <div class="filter-group-inline">
+                                <input type="text" id="filter-threat-ip" class="input-sm" placeholder="Filter by Target IP...">
+                                <select id="filter-threat-status" class="select-input select-sm">
+                                    <option value="ALL">All Response Statuses</option>
+                                    <option value="EXECUTED">EXECUTED</option>
+                                    <option value="ALREADY_ACTIVE">ALREADY_ACTIVE</option>
+                                    <option value="SKIPPED_WHITELIST">SKIPPED_WHITELIST</option>
+                                    <option value="FAILED">FAILED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="threat-responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Incident</th>
+                                        <th>Threat Type</th>
+                                        <th>Action Taken</th>
+                                        <th>Target Identifier</th>
+                                        <th>Outcome</th>
+                                        <th>Executed At</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threat-responses-tbody">
+                                    <tr><td colspan="8" class="text-center py-4">Loading threat response history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: INVESTIGATION CENTER (Review 3 Phase 6B) -->
+                <section id="view-investigation" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Investigation & Forensic Triage Center</h2>
+                            <p class="section-desc">Collaborative case dossiers, technical forensic notes, structured JSON telemetry, and incident resolution workflow.</p>
+                        </div>
+                        <div class="filter-group-inline">
+                            <label for="investigation-incident-select" style="font-weight:600; color:var(--text-secondary);">Select Case:</label>
+                            <select id="investigation-incident-select" class="select-input">
+                                <option value="">-- Choose Incident to Investigate --</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-investigation">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Case Dossier Header Card -->
+                    <div id="investigation-case-dossier" class="card p-4 mb-4" style="display:none;">
+                        <div class="dossier-top-bar">
+                            <div>
+                                <span class="badge badge-accent mb-1" id="dossier-id-badge">Incident #--</span>
+                                <h2 id="dossier-title" style="margin:4px 0; color:#f8fafc;">Select an incident</h2>
+                                <p id="dossier-desc" class="text-muted" style="margin-bottom:8px;">Technical details...</p>
+                                <div class="dossier-meta-tags">
+                                    <span id="dossier-severity-badge" class="badge">-- SEVERITY</span>
+                                    <span id="dossier-status-badge" class="badge">STATUS: --</span>
+                                    <span class="badge badge-secondary">Reported By: <strong id="dossier-author">--</strong></span>
+                                    <span class="badge badge-secondary">Created: <span id="dossier-created" class="text-mono">--</span></span>
+                                </div>
+                            </div>
+                            <div class="dossier-kpi-summary">
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Lead Investigator</span>
+                                    <span class="kpi-mini-val" id="dossier-assigned">Unassigned</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Root Cause</span>
+                                    <span class="kpi-mini-val text-amber" id="dossier-root-cause">Undetermined</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Forensic Notes</span>
+                                    <span class="kpi-mini-val text-cyan" id="dossier-total-notes">0</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Defensive Actions</span>
+                                    <span class="kpi-mini-val text-emerald" id="dossier-total-responses">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Summary Notice if resolved -->
+                        <div id="dossier-resolution-box" class="resolution-notice-box mt-3" style="display:none;">
+                            <strong>✅ Technical Resolution Documented:</strong>
+                            <p id="dossier-resolution-text" style="margin:4px 0;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Prompt -->
+                    <div id="investigation-empty-state" class="card text-center p-5">
+                        <div style="font-size:48px; margin-bottom:12px;">🔬</div>
+                        <h3>No Incident Selected for Forensic Triage</h3>
+                        <p class="text-muted">Select an incident from the dropdown above, or click "Investigate" in the Incident Management table.</p>
+                    </div>
+
+                    <!-- Active Investigation Workspace Grid -->
+                    <div id="investigation-workspace" class="dashboard-split-grid" style="display:none;">
+                        <!-- Left Column: Notes & JSON Evidence -->
+                        <div class="investigation-left-col">
+                            <!-- Notes Feed -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>📝 Forensic Notes & Evidence Log</h3>
+                                    <span class="badge badge-secondary" id="notes-count-badge">0 Notes</span>
+                                </div>
+                                <div id="investigation-notes-list" class="notes-feed-container p-3">
+                                    <p class="text-muted text-center py-4">No investigation notes recorded yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>➕ Append Investigation Note & Structured Evidence</h3>
+                                </div>
+                                <form id="form-add-investigation-note" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="inv-note-narrative">Technical Narrative / Observation *</label>
+                                        <textarea id="inv-note-narrative" rows="3" class="form-control" placeholder="Document triage findings, port scan details, or containment steps taken..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <label for="inv-evidence-data" style="margin:0;">Structured JSON Evidence Payload (Optional)</label>
+                                            <div class="evidence-preset-buttons">
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-login">Preset: Login Activity</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-ip">Preset: Source IP</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-alert">Preset: Security Alert</button>
+                                            </div>
+                                        </div>
+                                        <textarea id="inv-evidence-data" rows="4" class="form-control text-mono" placeholder='{"evidenceType": "LOGIN_ACTIVITY", "sourceIp": "198.51.100.50", "attempts": 5}'></textarea>
+                                        <small class="text-muted">Must be valid JSON syntax or empty (maximum payload: 64 KB).</small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn-submit-inv-note">Save Investigation Note</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Case Controls & Chronological Timeline -->
+                        <div class="investigation-right-col">
+                            <!-- Case Ownership & Classification Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>⚖️ Investigator Assignment & Root Cause</h3>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Assignment Form -->
+                                    <form id="form-assign-investigator" class="mb-4">
+                                        <label for="assign-investigator-select" style="font-weight:600;">Assign Lead Investigator (Admin Authority):</label>
+                                        <div style="display:flex; gap:8px; margin-top:6px;">
+                                            <select id="assign-investigator-select" class="select-input" style="flex:1;">
+                                                <option value="">-- Select Investigator --</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm" id="btn-submit-assignment">Assign</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Root Cause Classification Form -->
+                                    <form id="form-root-cause">
+                                        <label for="root-cause-category" style="font-weight:600;">Suspected Root Cause Classification:</label>
+                                        <div style="margin-top:6px;">
+                                            <select id="root-cause-category" class="select-input mb-2" style="width:100%;">
+                                                <option value="BRUTE_FORCE_ATTACK">BRUTE_FORCE_ATTACK (Automated Password Guessing)</option>
+                                                <option value="CREDENTIAL_STUFFING">CREDENTIAL_STUFFING (Breached Credential Replay)</option>
+                                                <option value="UNAUTHORIZED_ACCESS">UNAUTHORIZED_ACCESS (Privilege Abuse / Bypass)</option>
+                                                <option value="SUSPICIOUS_LOGIN_ACTIVITY">SUSPICIOUS_LOGIN_ACTIVITY (Anomalous Geolocation/Hours)</option>
+                                                <option value="OTHER">OTHER (Custom Root Cause)</option>
+                                            </select>
+                                            <input type="text" id="root-cause-explanation" class="form-control mb-2" placeholder="Brief technical rationale...">
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-block" id="btn-submit-root-cause">Update Root Cause</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Incident Resolution Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>🎯 Incident Resolution & Lifecycle</h3>
+                                </div>
+                                <form id="form-resolve-incident" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="resolve-summary-text">Technical Resolution Summary *</label>
+                                        <textarea id="resolve-summary-text" rows="3" class="form-control" placeholder="Summarize defensive countermeasures taken, credential rotations, or IP blocks verified..." required></textarea>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="submit" class="btn btn-success" style="flex:1;" id="btn-resolve-case">Mark Incident RESOLVED</button>
+                                        <button type="button" class="btn btn-secondary" id="btn-close-case">Close Case</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Chronological Forensic Timeline -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>⏳ Forensic Investigation Timeline</h3>
+                                </div>
+                                <div id="investigation-timeline-container" class="timeline p-3">
+                                    <p class="text-muted text-center py-4">Loading timeline...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 6: ABOUT & TEAM -->
+                <section id="view-about" class="content-view">
+                    <div class="view-header">
+                        <h2>About CyberShield</h2>
+                        <span class="badge badge-accent">Course Project</span>
+                    </div>
+
+                    <div class="about-grid">
+                        <div class="card about-main-card">
+                            <h3>Project Overview</h3>
+                            <p><strong>CyberShield</strong> is an integrated Cybersecurity Monitoring and Incident Management System designed for educational demonstration and enterprise SOC workflow simulation. It provides centralized threat logging, role-based incident triage, unauthorized access tracking, and real-time posture reporting.</p>
+                            
+                            <h4>System Architecture</h4>
+                            <p>The system adheres to a decoupled client-server architecture sharing a single SQLite database:</p>
+                            <ul class="arch-list">
+                                <li><strong>Web Frontend:</strong> Pure HTML5, CSS3, and vanilla JavaScript communicating with the backend via REST API.</li>
+                                <li><strong>Backend Server:</strong> Lightweight embedded Java HTTP server (<code>com.sun.net.httpserver</code>) providing JSON endpoints and session management.</li>
+                                <li><strong>Database Layer:</strong> Persistent SQLite storage accessed via plain JDBC and secure prepared statements.</li>
+                                <li><strong>Desktop Client:</strong> Full-featured Java Swing desktop application on Event Dispatch Thread (EDT) connected to the same backend.</li>
+                            </ul>
+                        </div>
+
+                        <div class="card team-card">
+                            <h3>Project Review Team</h3>
+                            <p class="subtitle">Second Year B.Tech CSE — Project Review</p>
+                            
+                            <div class="member-card">
+                                <div class="member-avatar">👨‍💻</div>
+                                <div class="member-info">
+                                    <h4>[Student Name Placeholder]</h4>
+                                    <p class="member-sub">Reg. No: <strong>[RA231100301XXXX]</strong></p>
+                                    <p class="member-role">Module: Authentication, Security & Backend API</p>
+                                </div>
+                            </div>
+
+                            <div class="member-card">
+                                <div class="member-avatar">👩‍💻</div>
+                                <div class="member-info">
+                                    <h4>[Student Name Placeholder]</h4>
+                                    <p class="member-sub">Reg. No: <strong>[RA231100301XXXX]</strong></p>
+                                    <p class="member-role">Module: Java Swing Desktop GUI & Component Lab</p>
+                                </div>
+                            </div>
+
+                            <div class="member-card guide-card">
+                                <div class="member-avatar">👨‍🏫</div>
+                                <div class="member-info">
+                                    <h4>[Faculty Guide Placeholder]</h4>
+                                    <p class="member-sub">Department of Computer Science & Engineering</p>
+                                    <p class="member-role">Project Supervisor / Faculty Mentor</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: THREAT RESPONSE CENTER (Review 3 Phase 6B) -->
+                <section id="view-threat-response" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Threat Response Center</h2>
+                            <p class="section-desc">Active application-level firewall, defensive countermeasures, and mitigation audit telemetry.</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-threat-response">🔄 Refresh Defense Telemetry</button>
+                    </div>
+
+                    <!-- Top Split: Manual Blocking & Blocked IPs Table -->
+                    <div class="dashboard-split-grid mb-4">
+                        <!-- Manual IP Block Form -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🛡️ Manual Firewall IP Containment</h3>
+                                <span class="badge badge-accent">Admin Authority</span>
+                            </div>
+                            <form id="form-manual-block" class="p-3">
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-address">Target IPv4 / IPv6 Address *</label>
+                                    <input type="text" id="block-ip-address" class="form-control" placeholder="e.g. 198.51.100.44" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-reason">Security Justification / Reason *</label>
+                                    <input type="text" id="block-ip-reason" class="form-control" placeholder="e.g. Hostile credential spray detected" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="block-ip-duration">Containment Duration</label>
+                                    <select id="block-ip-duration" class="select-input">
+                                        <option value="15" selected>15 Minutes (Standard Policy)</option>
+                                        <option value="30">30 Minutes</option>
+                                        <option value="60">1 Hour</option>
+                                        <option value="1440">24 Hours</option>
+                                        <option value="0">Permanent Block</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-block" id="btn-submit-ip-block">Enforce IP Block</button>
+                            </form>
+                        </div>
+
+                        <!-- Active Blocked IPs Table -->
+                        <div class="card panel-card">
+                            <div class="panel-header">
+                                <h3>🚫 Contained / Blocked IP Addresses</h3>
+                                <div class="filter-group-inline">
+                                    <select id="filter-blocked-status" class="select-input select-sm">
+                                        <option value="ALL">All Records</option>
+                                        <option value="ACTIVE" selected>Active Blocks Only</option>
+                                        <option value="EXPIRED">Expired</option>
+                                        <option value="UNBLOCKED">Manually Unblocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="blocked-ips-table">
+                                    <thead>
+                                        <tr>
+                                            <th>IP Address</th>
+                                            <th>Reason</th>
+                                            <th>Blocked At</th>
+                                            <th>Expires In</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blocked-ips-tbody">
+                                        <tr><td colspan="6" class="text-center py-4">Loading blocked IPs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Threat Response History -->
+                    <div class="card table-card">
+                        <div class="panel-header">
+                            <div>
+                                <h3>📜 Automated & Manual Defense Execution History</h3>
+                                <p class="text-muted text-sm">Auditable history of containment actions executed by the Intrusion Detection System.</p>
+                            </div>
+                            <div class="filter-group-inline">
+                                <input type="text" id="filter-threat-ip" class="input-sm" placeholder="Filter by Target IP...">
+                                <select id="filter-threat-status" class="select-input select-sm">
+                                    <option value="ALL">All Response Statuses</option>
+                                    <option value="EXECUTED">EXECUTED</option>
+                                    <option value="ALREADY_ACTIVE">ALREADY_ACTIVE</option>
+                                    <option value="SKIPPED_WHITELIST">SKIPPED_WHITELIST</option>
+                                    <option value="FAILED">FAILED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="threat-responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Incident</th>
+                                        <th>Threat Type</th>
+                                        <th>Action Taken</th>
+                                        <th>Target Identifier</th>
+                                        <th>Outcome</th>
+                                        <th>Executed At</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threat-responses-tbody">
+                                    <tr><td colspan="8" class="text-center py-4">Loading threat response history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: INVESTIGATION CENTER (Review 3 Phase 6B) -->
+                <section id="view-investigation" class="content-view">
+                    <div class="view-header">
+                        <div>
+                            <h2>Investigation & Forensic Triage Center</h2>
+                            <p class="section-desc">Collaborative case dossiers, technical forensic notes, structured JSON telemetry, and incident resolution workflow.</p>
+                        </div>
+                        <div class="filter-group-inline">
+                            <label for="investigation-incident-select" style="font-weight:600; color:var(--text-secondary);">Select Case:</label>
+                            <select id="investigation-incident-select" class="select-input">
+                                <option value="">-- Choose Incident to Investigate --</option>
+                            </select>
+                            <button class="btn btn-secondary btn-sm" id="btn-refresh-investigation">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Case Dossier Header Card -->
+                    <div id="investigation-case-dossier" class="card p-4 mb-4" style="display:none;">
+                        <div class="dossier-top-bar">
+                            <div>
+                                <span class="badge badge-accent mb-1" id="dossier-id-badge">Incident #--</span>
+                                <h2 id="dossier-title" style="margin:4px 0; color:#f8fafc;">Select an incident</h2>
+                                <p id="dossier-desc" class="text-muted" style="margin-bottom:8px;">Technical details...</p>
+                                <div class="dossier-meta-tags">
+                                    <span id="dossier-severity-badge" class="badge">-- SEVERITY</span>
+                                    <span id="dossier-status-badge" class="badge">STATUS: --</span>
+                                    <span class="badge badge-secondary">Reported By: <strong id="dossier-author">--</strong></span>
+                                    <span class="badge badge-secondary">Created: <span id="dossier-created" class="text-mono">--</span></span>
+                                </div>
+                            </div>
+                            <div class="dossier-kpi-summary">
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Lead Investigator</span>
+                                    <span class="kpi-mini-val" id="dossier-assigned">Unassigned</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Root Cause</span>
+                                    <span class="kpi-mini-val text-amber" id="dossier-root-cause">Undetermined</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Forensic Notes</span>
+                                    <span class="kpi-mini-val text-cyan" id="dossier-total-notes">0</span>
+                                </div>
+                                <div class="kpi-mini-box">
+                                    <span class="kpi-mini-label">Defensive Actions</span>
+                                    <span class="kpi-mini-val text-emerald" id="dossier-total-responses">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Summary Notice if resolved -->
+                        <div id="dossier-resolution-box" class="resolution-notice-box mt-3" style="display:none;">
+                            <strong>✅ Technical Resolution Documented:</strong>
+                            <p id="dossier-resolution-text" style="margin:4px 0;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State Prompt -->
+                    <div id="investigation-empty-state" class="card text-center p-5">
+                        <div style="font-size:48px; margin-bottom:12px;">🔬</div>
+                        <h3>No Incident Selected for Forensic Triage</h3>
+                        <p class="text-muted">Select an incident from the dropdown above, or click "Investigate" in the Incident Management table.</p>
+                    </div>
+
+                    <!-- Active Investigation Workspace Grid -->
+                    <div id="investigation-workspace" class="dashboard-split-grid" style="display:none;">
+                        <!-- Left Column: Notes & JSON Evidence -->
+                        <div class="investigation-left-col">
+                            <!-- Notes Feed -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>📝 Forensic Notes & Evidence Log</h3>
+                                    <span class="badge badge-secondary" id="notes-count-badge">0 Notes</span>
+                                </div>
+                                <div id="investigation-notes-list" class="notes-feed-container p-3">
+                                    <p class="text-muted text-center py-4">No investigation notes recorded yet.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>➕ Append Investigation Note & Structured Evidence</h3>
+                                </div>
+                                <form id="form-add-investigation-note" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="inv-note-narrative">Technical Narrative / Observation *</label>
+                                        <textarea id="inv-note-narrative" rows="3" class="form-control" placeholder="Document triage findings, port scan details, or containment steps taken..." required></textarea>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <label for="inv-evidence-data" style="margin:0;">Structured JSON Evidence Payload (Optional)</label>
+                                            <div class="evidence-preset-buttons">
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-login">Preset: Login Activity</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-ip">Preset: Source IP</button>
+                                                <button type="button" class="btn btn-xs btn-outline" id="btn-preset-alert">Preset: Security Alert</button>
+                                            </div>
+                                        </div>
+                                        <textarea id="inv-evidence-data" rows="4" class="form-control text-mono" placeholder='{"evidenceType": "LOGIN_ACTIVITY", "sourceIp": "198.51.100.50", "attempts": 5}'></textarea>
+                                        <small class="text-muted">Must be valid JSON syntax or empty (maximum payload: 64 KB).</small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="btn-submit-inv-note">Save Investigation Note</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Case Controls & Chronological Timeline -->
+                        <div class="investigation-right-col">
+                            <!-- Case Ownership & Classification Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>⚖️ Investigator Assignment & Root Cause</h3>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Assignment Form -->
+                                    <form id="form-assign-investigator" class="mb-4">
+                                        <label for="assign-investigator-select" style="font-weight:600;">Assign Lead Investigator (Admin Authority):</label>
+                                        <div style="display:flex; gap:8px; margin-top:6px;">
+                                            <select id="assign-investigator-select" class="select-input" style="flex:1;">
+                                                <option value="">-- Select Investigator --</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-secondary btn-sm" id="btn-submit-assignment">Assign</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Root Cause Classification Form -->
+                                    <form id="form-root-cause">
+                                        <label for="root-cause-category" style="font-weight:600;">Suspected Root Cause Classification:</label>
+                                        <div style="margin-top:6px;">
+                                            <select id="root-cause-category" class="select-input mb-2" style="width:100%;">
+                                                <option value="BRUTE_FORCE_ATTACK">BRUTE_FORCE_ATTACK (Automated Password Guessing)</option>
+                                                <option value="CREDENTIAL_STUFFING">CREDENTIAL_STUFFING (Breached Credential Replay)</option>
+                                                <option value="UNAUTHORIZED_ACCESS">UNAUTHORIZED_ACCESS (Privilege Abuse / Bypass)</option>
+                                                <option value="SUSPICIOUS_LOGIN_ACTIVITY">SUSPICIOUS_LOGIN_ACTIVITY (Anomalous Geolocation/Hours)</option>
+                                                <option value="OTHER">OTHER (Custom Root Cause)</option>
+                                            </select>
+                                            <input type="text" id="root-cause-explanation" class="form-control mb-2" placeholder="Brief technical rationale...">
+                                            <button type="submit" class="btn btn-secondary btn-sm btn-block" id="btn-submit-root-cause">Update Root Cause</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Incident Resolution Card -->
+                            <div class="card panel-card mb-4">
+                                <div class="panel-header">
+                                    <h3>🎯 Incident Resolution & Lifecycle</h3>
+                                </div>
+                                <form id="form-resolve-incident" class="p-3">
+                                    <div class="form-group mb-3">
+                                        <label for="resolve-summary-text">Technical Resolution Summary *</label>
+                                        <textarea id="resolve-summary-text" rows="3" class="form-control" placeholder="Summarize defensive countermeasures taken, credential rotations, or IP blocks verified..." required></textarea>
+                                    </div>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="submit" class="btn btn-success" style="flex:1;" id="btn-resolve-case">Mark Incident RESOLVED</button>
+                                        <button type="button" class="btn btn-secondary" id="btn-close-case">Close Case</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Chronological Forensic Timeline -->
+                            <div class="card panel-card">
+                                <div class="panel-header">
+                                    <h3>⏳ Forensic Investigation Timeline</h3>
+                                </div>
+                                <div id="investigation-timeline-container" class="timeline p-3">
+                                    <p class="text-muted text-center py-4">Loading timeline...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Incident Add / Edit Modal -->
+    <div id="incident-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="incident-modal-title">Report New Incident</h3>
+                <button type="button" class="btn-close" id="btn-close-incident-modal">×</button>
+            </div>
+
+            <form id="incident-form">
+                <input type="hidden" id="incident-id">
+                
+                <div class="form-group">
+                    <label for="incident-title">Incident Title *</label>
+                    <input type="text" id="incident-title" placeholder="e.g. Suspicious Port Scan from Remote Host" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="incident-severity">Severity Level *</label>
+                        <select id="incident-severity" class="select-input" required>
+                            <option value="CRITICAL">Critical</option>
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="LOW">Low</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="incident-status">Status *</label>
+                        <select id="incident-status" class="select-input" required>
+                            <option value="OPEN" selected>Open</option>
+                            <option value="INVESTIGATING">Investigating</option>
+                            <option value="RESOLVED">Resolved</option>
+                            <option value="CLOSED">Closed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="incident-description">Description & Details *</label>
+                    <textarea id="incident-description" rows="4" placeholder="Provide technical details, IP addresses, affected hostnames, and findings..." required></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-incident">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-incident">Save Incident</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Threat Response Details Modal -->
+    <div id="threat-details-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="threat-modal-title">Threat Response Defense Details</h3>
+                <button type="button" class="btn-close" id="btn-close-threat-modal">×</button>
+            </div>
+            <div id="threat-modal-body" class="p-3">
+                <p>Loading threat response...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-dismiss-threat-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
