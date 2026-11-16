@@ -272,12 +272,16 @@ body {
 }
 
 .content-view {
-    display: none;
+    display: none !important;
     animation: fadeIn 0.2s ease-in-out;
 }
 
 .content-view.active {
-    display: block;
+    display: block !important;
+}
+
+.content-view:not(.active) {
+    display: none !important;
 }
 
 @keyframes fadeIn {

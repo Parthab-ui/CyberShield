@@ -68,6 +68,18 @@ async function api(endpoint, method = 'GET', body = null) {
 // 3. INITIALIZATION & LIFECYCLE
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Atomic initial state reset for all tab panels
+    document.querySelectorAll('.content-view').forEach(panel => {
+        panel.classList.remove('active');
+        panel.style.removeProperty('display');
+        panel.style.display = 'none';
+    });
+    const initialDefault = document.getElementById('view-dashboard');
+    if (initialDefault) {
+        initialDefault.classList.add('active');
+        initialDefault.style.display = 'block';
+    }
+
     initAuthForms();
     initNavigation();
     initIncidentEvents();
@@ -347,15 +359,21 @@ function navigateTo(viewId) {
         }
     });
 
-    // Hide all view sections, show target
-    document.querySelectorAll('.view-section').forEach(section => {
+    // Atomic panel reset — hide ALL content panels, strip inline display styles
+    document.querySelectorAll('.content-view').forEach(section => {
         section.classList.remove('active');
+        section.style.removeProperty('display');
     });
 
+    // Show only the target panel
     const targetSection = document.getElementById(viewId);
     if (targetSection) {
         targetSection.classList.add('active');
     }
+
+    // Viewport scroll reset
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) mainContent.scrollTop = 0;
 
     // Update Header Page Title
     const titleElem = document.getElementById('page-title');
