@@ -21,3 +21,6 @@ data/*.db-shm
 
 # Scratch scripts
 scratch/
+
+# Archives
+*.zip
