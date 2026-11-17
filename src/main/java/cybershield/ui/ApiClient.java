@@ -92,51 +92,78 @@ public class ApiClient {
         this.sessionToken = null;
     }
 
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
     public User getCurrentUser() {
+        if (sessionToken != null) {
+            User valid = SessionManager.validateSession(sessionToken);
+            if (valid == null) {
+                this.currentUser = null;
+                this.sessionToken = null;
+            } else {
+                this.currentUser = valid;
+            }
+        }
         return currentUser;
     }
 
     public boolean isAuthenticated() {
-        return currentUser != null;
+        return getCurrentUser() != null;
     }
 
     public boolean isAdmin() {
-        return currentUser != null && currentUser.isAdmin();
+        User u = getCurrentUser();
+        return u != null && u.isAdmin();
     }
 
     public boolean isAnalyst() {
-        return currentUser != null && currentUser.isAnalyst();
+        User u = getCurrentUser();
+        return u != null && u.isAnalyst();
+    }
+
+    private void requireAuth() {
+        if (!isAuthenticated()) {
+            throw new SecurityException("Authentication required. Please log in.");
+        }
     }
 
     /** Retrieves dashboard metrics. */
     public DashboardStats getDashboardStats() {
+        requireAuth();
         return dashboardService.getStats();
     }
 
     /** Retrieves filtered incidents. */
     public List<Incident> getIncidents(String query, String severity, String status) {
+        requireAuth();
         return incidentService.getAll(query, severity, status);
     }
 
     /** Retrieves an incident by ID. */
     public Incident getIncidentById(int id) {
+        requireAuth();
         return incidentService.getById(id);
     }
 
     /** Creates a new incident. */
     public Incident createIncident(Incident incident) {
+        requireAuth();
         String actor = currentUser != null ? currentUser.getUsername() : "desktop_analyst";
         return incidentService.create(incident, actor);
     }
 
     /** Updates an incident. */
     public boolean updateIncident(int id, Incident updated) {
+        requireAuth();
         String actor = currentUser != null ? currentUser.getUsername() : "desktop_analyst";
         return incidentService.update(id, updated, actor);
     }
 
     /** Deletes an incident (requires ADMIN role). */
     public boolean deleteIncident(int id) {
+        requireAuth();
         if (!isAdmin()) {
             throw new SecurityException("Permission Denied: Only Administrator role can delete incident records.");
         }
@@ -146,32 +173,38 @@ public class ApiClient {
 
     /** Retrieves access monitoring events. */
     public List<AccessEvent> getAccessEvents(int limit) {
+        requireAuth();
         return accessEventService.getAll(limit);
     }
 
     /** Triggers a simulated intrusion attempt for demonstration. */
     public AccessEvent simulateThreat() {
+        requireAuth();
         String source = currentUser != null ? "DESKTOP:" + currentUser.getUsername() : "DESKTOP_EVAL";
         return accessEventService.simulateThreat(source);
     }
 
     /** Retrieves system activity log. */
     public List<ActivityLog> getActivity(int limit) {
+        requireAuth();
         return activityLogService.getAll(limit);
     }
 
     /** Retrieves latest active security alert for desktop dashboard. */
     public SecurityAlert getLatestAlert() {
+        requireAuth();
         return intrusionDetectionService.getLatestAlert();
     }
 
     /** Retrieves recent security alerts. */
     public List<SecurityAlert> getRecentAlerts(int limit) {
+        requireAuth();
         return intrusionDetectionService.getRecentAlerts(limit);
     }
 
     /** Retrieves IDS configuration parameters. */
     public IntrusionDetectionConfig getIntrusionConfig() {
+        requireAuth();
         return intrusionDetectionService.getConfig();
     }
 
@@ -180,6 +213,7 @@ public class ApiClient {
      * Records 5 failed login attempts in rapid succession to trigger the detection engine.
      */
     public SecurityAlert simulateBruteForceAttack(String ip) {
+        requireAuth();
         String targetIp = (ip != null && !ip.trim().isEmpty()) ? ip.trim() : "192.168.1.105";
         long now = System.currentTimeMillis();
         SecurityAlert alert = null;
@@ -195,11 +229,13 @@ public class ApiClient {
 
     /** Retrieves blocked IPs filtered by status (ACTIVE, EXPIRED, UNBLOCKED, or ALL). */
     public List<BlockedIp> getBlockedIps(String statusFilter) {
+        requireAuth();
         return ipBlockService.getAllBlockedIps(statusFilter);
     }
 
     /** Blocks an IP address manually (requires ADMIN role). */
     public BlockedIp blockIp(String ip, String reason, long durationMinutes) {
+        requireAuth();
         if (!isAdmin()) {
             throw new SecurityException("Permission Denied: Only Administrator can manually block IP addresses.");
         }
@@ -209,6 +245,7 @@ public class ApiClient {
 
     /** Unblocks an IP address (requires ADMIN role). */
     public boolean unblockIp(String ip) {
+        requireAuth();
         if (!isAdmin()) {
             throw new SecurityException("Permission Denied: Only Administrator can unblock IP addresses.");
         }
@@ -222,11 +259,13 @@ public class ApiClient {
 
     /** Retrieves all currently locked accounts. */
     public List<AccountLockStatus> getLockedAccounts() {
+        requireAuth();
         return accountLockoutService.getAllLockedAccounts();
     }
 
     /** Manually unlocks a user account (requires ADMIN role). */
     public boolean unlockAccount(String username) {
+        requireAuth();
         if (!isAdmin()) {
             throw new SecurityException("Permission Denied: Only Administrator can unlock user accounts.");
         }
@@ -240,11 +279,13 @@ public class ApiClient {
 
     /** Retrieves threat response execution history with optional filtering. */
     public List<ThreatResponse> getThreatResponses(Integer incidentId, String targetIp, String status) {
+        requireAuth();
         return threatResponseService.getResponseHistory(incidentId, targetIp, status);
     }
 
     /** Retrieves threat response metrics and KPI statistics. */
     public ThreatResponseStats getThreatResponseStats() {
+        requireAuth();
         return threatResponseService.getResponseStatistics();
     }
 
@@ -254,17 +295,20 @@ public class ApiClient {
 
     /** Retrieves forensic investigation notes for a given incident. */
     public List<InvestigationNote> getInvestigationNotes(int incidentId) {
+        requireAuth();
         return incidentInvestigationService.getInvestigationNotes(incidentId);
     }
 
     /** Records a new forensic investigation note with optional JSON evidence. */
     public InvestigationNote addInvestigationNote(int incidentId, String notes, String evidenceData) {
+        requireAuth();
         String analyst = currentUser != null ? currentUser.getUsername() : "desktop_analyst";
         return incidentInvestigationService.addInvestigationNote(incidentId, analyst, notes, evidenceData);
     }
 
     /** Assigns an incident to an analyst (requires ADMIN role). */
     public Incident assignInvestigator(int incidentId, String assignedAnalyst) {
+        requireAuth();
         if (!isAdmin()) {
             throw new SecurityException("Permission Denied: Only Administrator can assign investigators.");
         }
@@ -274,28 +318,33 @@ public class ApiClient {
 
     /** Classifies root cause category and rationale for an incident. */
     public Incident updateRootCause(int incidentId, String category, String explanation) {
+        requireAuth();
         String actor = currentUser != null ? currentUser.getUsername() : "desktop_analyst";
         return incidentInvestigationService.updateRootCause(incidentId, category, explanation, actor);
     }
 
     /** Retrieves unified chronological investigation timeline. */
     public List<InvestigationTimelineItem> getInvestigationTimeline(int incidentId) {
+        requireAuth();
         return incidentInvestigationService.getInvestigationTimeline(incidentId);
     }
 
     /** Retrieves comprehensive investigation case summary and metrics. */
     public InvestigationSummary getInvestigationSummary(int incidentId) {
+        requireAuth();
         return incidentInvestigationService.getInvestigationSummary(incidentId);
     }
 
     /** Resolves an incident with a forensic summary. */
     public boolean resolveIncident(int incidentId, String resolutionSummary) {
+        requireAuth();
         String actor = currentUser != null ? currentUser.getUsername() : "desktop_analyst";
         return incidentInvestigationService.resolveIncident(incidentId, resolutionSummary, actor);
     }
 
     /** Retrieves list of users eligible for assignment (ADMIN and ANALYST). */
     public List<User> getAssignableInvestigators() {
+        requireAuth();
         return userService.getAssignableInvestigators();
     }
 }

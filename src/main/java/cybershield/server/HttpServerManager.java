@@ -59,7 +59,9 @@ public class HttpServerManager {
         this.server = createdServer;
 
         // Route 1: REST API endpoints under '/api/'
-        server.createContext("/api", new ApiHandler());
+        ApiHandler apiHandler = new ApiHandler();
+        apiHandler.addAllowedOrigin(activePort);
+        server.createContext("/api", apiHandler);
 
         // Route 2: Static web files (HTML, CSS, JS) under root '/'
         server.createContext("/", new StaticFileHandler(WEB_DIR));

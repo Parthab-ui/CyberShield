@@ -92,7 +92,7 @@ if ($countBefore -eq $countAfter) {
 
 # 6. VERIFY DASHBOARD METRICS AND DEDICATED SECURITY ALERT SECTION
 Write-Host "`n[6/8] Verifying Real-Time Dashboard Metrics & Alert Section..." -ForegroundColor Yellow
-$stats = Invoke-RestMethod -Uri "$baseUrl/api/dashboard/stats" -Method Get
+$stats = Invoke-RestMethod -Uri "$baseUrl/api/dashboard/stats" -Method Get -Headers $headers
 Write-Host "  [OK] Dashboard Stats Retrieved:" -ForegroundColor Green
 Write-Host "       Total Incidents:          $($stats.totalIncidents)" -ForegroundColor White
 Write-Host "       Open / Active:            $($stats.openIncidents)" -ForegroundColor White
@@ -113,7 +113,7 @@ if ($stats.latestAlert) {
 
 # 7. VERIFY AUDIT LOGGING FOR AUTOMATED ACTIONS
 Write-Host "`n[7/8] Verifying Activity Audit Log for Automated Detection..." -ForegroundColor Yellow
-$activity = Invoke-RestMethod -Uri "$baseUrl/api/activity?limit=5" -Method Get
+$activity = Invoke-RestMethod -Uri "$baseUrl/api/activity?limit=5" -Method Get -Headers $headers
 $idsAudit = $activity | Where-Object { $_.username -eq "IDS_ENGINE" -or $_.action -eq "INTRUSION_ALERT" } | Select-Object -First 1
 
 if ($idsAudit) {

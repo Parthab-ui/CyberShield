@@ -163,7 +163,7 @@
                         </div>
                         <div class="alert-banner-footer">
                             <span class="alert-rule-note" id="alert-rule-note">Rule: 5 failed login attempts within 2 minutes triggered automated incident generation.</span>
-                            <button class="btn btn-sm btn-outline" id="btn-view-alert-incident" onclick="navigateTo('view-incidents')">View Auto-Generated Incident →</button>
+                            <button class="btn btn-sm btn-outline" id="btn-view-alert-incident">View Auto-Generated Incident →</button>
                         </div>
                     </div>
 
@@ -249,7 +249,7 @@
                         <div class="card panel-card">
                             <div class="panel-header">
                                 <h3>Recent Security Incidents</h3>
-                                <a href="#incidents" class="btn-link" onclick="navigateTo('view-incidents')">View All →</a>
+                                <a href="#incidents" class="btn-link" id="dashboard-view-all-incidents">View All →</a>
                             </div>
                             <div class="table-responsive">
                                 <table class="data-table" id="dashboard-incidents-table">
@@ -273,7 +273,7 @@
                         <div class="card panel-card">
                             <div class="panel-header">
                                 <h3>Live SOC Audit Feed</h3>
-                                <a href="#activity" class="btn-link" onclick="navigateTo('view-activity')">Full History →</a>
+                                <a href="#activity" class="btn-link" id="dashboard-view-all-activity">Full History →</a>
                             </div>
                             <div class="timeline" id="dashboard-activity-list">
                                 <div class="text-center py-4">Loading audit feed...</div>

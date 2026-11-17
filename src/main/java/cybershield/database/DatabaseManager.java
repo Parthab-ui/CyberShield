@@ -15,8 +15,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * DatabaseManager — Manages the SQLite database lifecycle, connection pooling,
- * schema generation, and idempotent sample data seeding.
+ * DatabaseManager — Manages the SQLite database lifecycle, JDBC connection per call via DriverManager
+ * (no connection pool), schema generation, and idempotent sample data seeding.
  * Demonstrates: JDBC connection handling, parameterized queries, and safe schema migration.
  */
 public class DatabaseManager {
@@ -299,10 +299,19 @@ public class DatabaseManager {
      * Seeds the default Administrator and Security Analyst accounts if they do not exist.
      */
     private static void seedDefaultUsers(Connection conn) throws SQLException {
-        // Seed Administrator account: admin / Admin@123
+        String adminPassword = System.getenv("CYBERSHIELD_ADMIN_PASSWORD");
+        if (adminPassword == null || adminPassword.trim().isEmpty()) {
+            adminPassword = "Admin@123";
+        }
+        String analystPassword = System.getenv("CYBERSHIELD_ANALYST_PASSWORD");
+        if (analystPassword == null || analystPassword.trim().isEmpty()) {
+            analystPassword = "Analyst@123";
+        }
+
+        // Seed Administrator account: admin
         if (!userExists(conn, "admin")) {
             String salt = PasswordUtils.generateSalt();
-            String hash = PasswordUtils.hashPassword("Admin@123", salt);
+            String hash = PasswordUtils.hashPassword(adminPassword, salt);
             String now = LocalDateTime.now().format(FORMATTER);
 
             String sql = "INSERT INTO users (username, password_hash, salt, role, created_at) VALUES (?, ?, ?, ?, ?)";
@@ -314,13 +323,13 @@ public class DatabaseManager {
                 pstmt.setString(5, now);
                 pstmt.executeUpdate();
             }
-            System.out.println("[DatabaseManager] Seeded default administrator account: 'admin'");
+            System.out.println("[DatabaseManager] Seeded default administrator account: 'admin' (PBKDF2)");
         }
 
-        // Seed Security Analyst account: analyst / Analyst@123
+        // Seed Security Analyst account: analyst
         if (!userExists(conn, "analyst")) {
             String salt = PasswordUtils.generateSalt();
-            String hash = PasswordUtils.hashPassword("Analyst@123", salt);
+            String hash = PasswordUtils.hashPassword(analystPassword, salt);
             String now = LocalDateTime.now().format(FORMATTER);
 
             String sql = "INSERT INTO users (username, password_hash, salt, role, created_at) VALUES (?, ?, ?, ?, ?)";
@@ -332,7 +341,7 @@ public class DatabaseManager {
                 pstmt.setString(5, now);
                 pstmt.executeUpdate();
             }
-            System.out.println("[DatabaseManager] Seeded default analyst account: 'analyst'");
+            System.out.println("[DatabaseManager] Seeded default analyst account: 'analyst' (PBKDF2)");
         }
     }
 

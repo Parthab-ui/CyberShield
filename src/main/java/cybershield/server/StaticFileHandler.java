@@ -7,13 +7,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
 
 /**
  * StaticFileHandler — Serves the HTML, CSS, JavaScript, and asset files
  * from the 'web' directory for the browser interface.
- * Demonstrates: HTTP file delivery, correct MIME type resolution, and 404 handling.
+ * Demonstrates: HTTP file delivery, correct MIME type resolution, path-traversal
+ * prevention, extension allow-listing, and security headers on every response.
  */
 public class StaticFileHandler implements HttpHandler {
+
+    /** Only these file extensions may be served. All others are blocked. */
+    private static final Set<String> ALLOWED_EXTENSIONS =
+            Set.of(".html", ".htm", ".css", ".js", ".json", ".svg", ".png", ".jpg", ".jpeg", ".ico");
 
     private final String webRoot;
 
@@ -23,6 +29,14 @@ public class StaticFileHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        // Security headers on every static response
+        exchange.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
+        exchange.getResponseHeaders().set("X-Frame-Options", "DENY");
+        exchange.getResponseHeaders().set("Referrer-Policy", "no-referrer");
+        exchange.getResponseHeaders().set(
+                "Content-Security-Policy",
+                "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'");
+
         String path = exchange.getRequestURI().getPath();
 
         // Default root maps to index.html
@@ -30,18 +44,36 @@ public class StaticFileHandler implements HttpHandler {
             path = "/index.html";
         }
 
-        // Prevent path traversal outside the web folder
+        // Resolve canonical path and validate it stays inside webRoot
         File file = new File(webRoot, path.replace('/', File.separatorChar));
-        String canonicalPath = file.getCanonicalPath();
-        String canonicalRoot = new File(webRoot).getCanonicalPath();
+        String canonicalPath;
+        String canonicalRoot;
+        try {
+            canonicalPath = file.getCanonicalPath();
+            canonicalRoot = new File(webRoot).getCanonicalPath();
+        } catch (IOException e) {
+            send404(exchange);
+            return;
+        }
 
-        if (!canonicalPath.startsWith(canonicalRoot) || !file.exists() || file.isDirectory()) {
-            // If requested path is not found, fallback to index.html for Single Page App routing
+        // Path traversal guard: canonical path must start with root + separator (or equal root)
+        boolean insideRoot = canonicalPath.equals(canonicalRoot)
+                || canonicalPath.startsWith(canonicalRoot + File.separator);
+        if (!insideRoot || !file.exists() || file.isDirectory()) {
+            // SPA fallback: unknown paths serve index.html
             File indexFile = new File(webRoot, "index.html");
             if (indexFile.exists()) {
                 serveFile(exchange, indexFile, "text/html; charset=UTF-8");
                 return;
             }
+            send404(exchange);
+            return;
+        }
+
+        // Extension allow-list: reject anything not in the approved set
+        String lowerName = file.getName().toLowerCase();
+        boolean allowed = ALLOWED_EXTENSIONS.stream().anyMatch(lowerName::endsWith);
+        if (!allowed) {
             send404(exchange);
             return;
         }
@@ -78,13 +110,13 @@ public class StaticFileHandler implements HttpHandler {
     private String getMimeType(String fileName) {
         String lower = fileName.toLowerCase();
         if (lower.endsWith(".html") || lower.endsWith(".htm")) return "text/html; charset=UTF-8";
-        if (lower.endsWith(".css")) return "text/css; charset=UTF-8";
-        if (lower.endsWith(".js")) return "application/javascript; charset=UTF-8";
+        if (lower.endsWith(".css"))  return "text/css; charset=UTF-8";
+        if (lower.endsWith(".js"))   return "application/javascript; charset=UTF-8";
         if (lower.endsWith(".json")) return "application/json; charset=UTF-8";
-        if (lower.endsWith(".svg")) return "image/svg+xml";
-        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".svg"))  return "image/svg+xml";
+        if (lower.endsWith(".png"))  return "image/png";
         if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
-        if (lower.endsWith(".ico")) return "image/x-icon";
+        if (lower.endsWith(".ico"))  return "image/x-icon";
         return "text/plain; charset=UTF-8";
     }
 }

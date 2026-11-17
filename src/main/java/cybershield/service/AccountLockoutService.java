@@ -208,6 +208,7 @@ public class AccountLockoutService {
             pstmt.setString(1, cleanUser);
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
+                cybershield.security.SessionManager.invalidateSessionsForUser(cleanUser);
                 activityLogService.log(operator, "ACCOUNT_UNLOCKED",
                         "Account manually unlocked for user: " + cleanUser);
                 return true;

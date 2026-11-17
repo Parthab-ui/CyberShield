@@ -111,6 +111,12 @@ public class UserService {
                     // Verify using constant-time cryptographic check
                     boolean passwordMatches = PasswordUtils.verifyPassword(password, salt, storedHash);
                     if (passwordMatches) {
+                        // Transparently re-hash legacy SHA-256 hashes to modern PBKDF2 on successful login
+                        if (PasswordUtils.isLegacyHash(storedHash)) {
+                            upgradePassword(id, password);
+                            storedHash = PasswordUtils.hashPassword(password, salt);
+                        }
+
                         // Successful login resets consecutive failed attempts counter
                         accountLockoutService.resetFailedAttempts(uname);
 
@@ -175,6 +181,32 @@ public class UserService {
      */
     public User getUserByUsername(String username) {
         return findByUsername(username);
+    }
+
+    /**
+     * Transparently upgrades a user's legacy password hash to the modern PBKDF2 format.
+     */
+    public boolean upgradePassword(int userId, String plaintextPassword) {
+        if (plaintextPassword == null || userId <= 0) {
+            return false;
+        }
+        String newSalt = PasswordUtils.generateSalt();
+        String newHash = PasswordUtils.hashPassword(plaintextPassword, newSalt);
+        String sql = "UPDATE users SET password_hash = ?, salt = ? WHERE id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newHash);
+            pstmt.setString(2, newSalt);
+            pstmt.setInt(3, userId);
+            int updated = pstmt.executeUpdate();
+            if (updated > 0) {
+                System.out.println("[UserService] Upgraded password hash to PBKDF2 for user ID: " + userId);
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("[UserService] Failed to upgrade password for user ID " + userId + ": " + e.getMessage());
+        }
+        return false;
     }
 
     /**

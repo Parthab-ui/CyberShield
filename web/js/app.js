@@ -345,6 +345,30 @@ function initNavigation() {
 
     const btnRefreshAct = document.getElementById('btn-refresh-activity');
     if (btnRefreshAct) btnRefreshAct.addEventListener('click', () => loadActivityHistory());
+
+    const linkAllIncidents = document.getElementById('dashboard-view-all-incidents');
+    if (linkAllIncidents) {
+        linkAllIncidents.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('view-incidents');
+        });
+    }
+
+    const linkAllActivity = document.getElementById('dashboard-view-all-activity');
+    if (linkAllActivity) {
+        linkAllActivity.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('view-activity');
+        });
+    }
+
+    const btnViewAlert = document.getElementById('btn-view-alert-incident');
+    if (btnViewAlert) {
+        btnViewAlert.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('view-incidents');
+        });
+    }
 }
 
 function navigateTo(viewId) {

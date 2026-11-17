@@ -31,7 +31,7 @@ $threatRes = Invoke-RestMethod -Uri "http://localhost:8080/api/access-events/sim
 Write-Host "Simulated Threat Created ID:" $threatRes.id "Source:" $threatRes.source "Result:" $threatRes.result
 
 Write-Host "`n=== 6. TEST DASHBOARD STATS REFRESH ==="
-$stats = Invoke-RestMethod -Uri "http://localhost:8080/api/dashboard/stats" -Method Get
+$stats = Invoke-RestMethod -Uri "http://localhost:8080/api/dashboard/stats" -Method Get -Headers $headers
 Write-Host "Total Incidents:" $stats.totalIncidents "Open:" $stats.openIncidents "Critical:" $stats.criticalIncidents "Unauthorized Events:" $stats.unauthorizedEvents
 
 Write-Host "`n=== 7. TEST INCIDENT DELETION (ADMIN) ==="
@@ -39,7 +39,7 @@ $delRes = Invoke-RestMethod -Uri "http://localhost:8080/api/incidents/$createdId
 Write-Host "Delete Incident Success:" $delRes.success "Message:" $delRes.message
 
 Write-Host "`n=== 8. TEST AUDIT TRAIL ==="
-$activity = Invoke-RestMethod -Uri "http://localhost:8080/api/activity?limit=5" -Method Get
+$activity = Invoke-RestMethod -Uri "http://localhost:8080/api/activity?limit=5" -Method Get -Headers $headers
 Write-Host "Audit Log Records Count:" $activity.Count
 foreach ($a in $activity) {
     Write-Host "  -> [$($a.action)] by $($a.username): $($a.details)"

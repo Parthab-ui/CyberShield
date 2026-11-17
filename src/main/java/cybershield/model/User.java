@@ -5,6 +5,9 @@ package cybershield.model;
  * Demonstrates: Encapsulation with private attributes, public getters and setters.
  * Used for authentication, role-based access control (ADMIN vs ANALYST),
  * and Review 3 account lockout security state.
+ *
+ * SECURITY: Credential fields (passwordHash, salt) are sensitive internal data
+ * and must never be exposed or serialized in public or client API responses.
  */
 public class User {
     private int id;
